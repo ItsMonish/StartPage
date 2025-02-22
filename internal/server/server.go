@@ -32,10 +32,10 @@ func StartServer(logger *log.Logger, port int) {
 			logger.Println("Error closing server gracefully")
 		}
 
-		/* Include actions to be performed befreo server closes */
+		/* Include actions to be performed before server closes */
 	}()
 
-	logger.Println("Server starting")
+	logger.Println("Server starting at " + strconv.Itoa(port))
 
 	if err := clientServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 		logger.Fatal("Server failed to start on port " + strconv.Itoa(port))

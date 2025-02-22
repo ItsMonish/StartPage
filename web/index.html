@@ -1,13 +1,104 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Start Page</title>
+    <title>Startpage</title>
     <link rel="icon" type="image/png" href="chrome://branding/content/icon32.png">
+    <link rel="stylesheet" href="style.css">
+    <script>
+        <!--Firefox Flash of unstyled content fix-->
+        let FF_FOUC_FIX;
+    </script>
 </head>
-<body>
-    <h1>I guess it works</h1>
-</body>
-</html>
 
+<body>
+
+    <!-- Page Transition Element -->
+    <div class="transition" id="transition"></div>
+
+    <!-- RSS Feed Toggle Icon -->
+    <div class="rss-icon" onclick="toggleRSS()">
+        &#x1F4F0; <!-- RSS icon (Unicode) -->
+    </div>
+
+    <!-- Main Page Content -->
+    <div class="container">
+        <!-- Search Bar -->
+        <input class="search-bar" type="text" placeholder="Search..." />
+
+        <div class="favorites">
+            <div class="column">
+                <h2>Category 1</h2>
+                <ul>
+                    <li><a href="#">Favorite 1</a></li>
+                    <li><a href="#">Favorite 2</a></li>
+                    <li><a href="#">Favorite 3</a></li>
+                </ul>
+            </div>
+            <div class="column">
+                <h2>Category 2</h2>
+                <ul>
+                    <li><a href="#">Favorite 1</a></li>
+                    <li><a href="#">Favorite 2</a></li>
+                    <li><a href="#">Favorite 3</a></li>
+                </ul>
+            </div>
+            <div class="column">
+                <h2>Category 3</h2>
+                <ul>
+                    <li><a href="#">Favorite 1</a></li>
+                    <li><a href="#">Favorite 2</a></li>
+                    <li><a href="#">Favorite 3</a></li>
+                </ul>
+            </div>
+            <div class="column">
+                <h2>Category 4</h2>
+                <ul>
+                    <li><a href="#">Favorite 1</a></li>
+                    <li><a href="#">Favorite 2</a></li>
+                    <li><a href="#">Favorite 3</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- RSS Feed Page (hidden by default) -->
+    <div id="rss-feed">
+        <h1>RSS Feed</h1>
+
+        <!-- Dropdown Filters -->
+        <select id="category-filter">
+            <option value="all">All Categories</option>
+            <option value="news">News</option>
+            <option value="tech">Tech</option>
+            <option value="sports">Sports</option>
+        </select>
+
+        <select id="read-filter">
+            <option value="all">All</option>
+            <option value="read">Read</option>
+            <option value="unread">Unread</option>
+        </select>
+
+        <!-- Placeholder Feed Entries -->
+        <div id="feed-list">
+            <div class="feed-item">
+                <h3>Feed Title 1</h3>
+                <p><strong>Source:</strong> Example Source</p>
+                <p>Preview of the feed content goes here...</p>
+            </div>
+            <div class="feed-item">
+                <h3>Feed Title 2</h3>
+                <p><strong>Source:</strong> Another Source</p>
+                <p>Preview of the feed content goes here...</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+
+</body>
+
+</html>
