@@ -1,0 +1,15 @@
+port: 8080
+
+rss:
+  security:
+    - title: Dark Reading
+      url: https://www.darkreading.com/rss.xml
+    - title: The Hacker News
+      url: https://feeds.feedburner.com/TheHackersNews
+  privacy:
+    - title: EFF 
+      url: https://www.eff.org/rss/updates.xml
+
+youtube:
+  - title: Sample
+    url: https://example.com/
