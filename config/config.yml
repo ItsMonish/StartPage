@@ -1,5 +1,39 @@
-port: 8080
+# Server and other properties
+properties:
+  port: 8080
+  refreshInterval: 60
 
+# Quick links to be displayed under search bar in Main page
+# list[1,2,3,4]Names field indicate the name for the column
+# list[1,2,3,4] take number of title and url pairs to be shown
+quicklinks:
+  list1Name: Services
+  list1:
+    - title: ProtonMail
+      url: https://account.proton.me/login
+    - title: Tuta
+      url: https://app.tuta.com/login
+  list2Name: Social
+  list2:
+    - title: Reddit
+      url: https://reddit.com/
+  list3Name: Tools
+  list3:
+    - title: Cyberchef
+      url: https://cyberchef.org/
+    - title: Dogbolt
+      url: https://dogbolt.org
+  list4Name: Materials
+  list4:
+    - title: GTFOBins
+      url: https://gtfobins.github.io/
+    - title: MITRE ATT&CK
+      url: https://attack.mitre.org
+
+# RSS Feeds go here
+# Feeds can be categorized, the category can be anything like security and 
+# privacy as shown below
+# Under each category fill in the feed XML URL and name pairs
 rss:
   security:
     - title: Dark Reading
@@ -10,6 +44,10 @@ rss:
     - title: EFF 
       url: https://www.eff.org/rss/updates.xml
 
+# Youtube feed go here
+# No category feature here as of now. Just fill in Channel name and XML list
+# XML URL is ://www.youtube.com/feeds/videos.xml?channel_id=<channel id> 
+# where channel ID of the respective channel needs to filled in place of <channel id>
 youtube:
   - title: Sample
     url: https://example.com/
