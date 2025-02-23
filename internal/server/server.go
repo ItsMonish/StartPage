@@ -1,22 +1,32 @@
 package server
 
 import (
+	"html/template"
 	"log"
 	"net/http"
 	"os"
 	"os/signal"
 	"strconv"
 	"syscall"
+
+	"github.com/ItsMonish/StartPage/internal/config"
 )
 
-func StartServer(logger *log.Logger, port int) {
+func StartServer(logger *log.Logger, conf config.Configuration) {
 
 	mux := http.NewServeMux()
 
-	mux.Handle("/", http.FileServer(http.Dir("./web")))
+	fs := http.FileServer(http.Dir("./web/"))
+
+	mux.Handle("/assets/", http.StripPrefix("/assets/", fs))
+
+	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		templateObject := template.Must(template.ParseFiles("./template/startpage.html"))
+		templateObject.Execute(w, nil)
+	})
 
 	clientServer := &http.Server{
-		Addr:    ":" + strconv.Itoa(port),
+		Addr:    ":" + strconv.Itoa(conf.Props.Port),
 		Handler: mux,
 	}
 
@@ -35,9 +45,9 @@ func StartServer(logger *log.Logger, port int) {
 		/* Include actions to be performed before server closes */
 	}()
 
-	logger.Println("Server starting at: ", port)
+	logger.Println("Server starting at: ", conf.Props.Port)
 
 	if err := clientServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-		logger.Fatal("Server failed to start on port: ", port)
+		logger.Fatal("Server failed to start on port: ", conf.Props.Port)
 	}
 }

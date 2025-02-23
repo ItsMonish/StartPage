@@ -30,7 +30,7 @@ func main() {
 	conf := config.GetConfig(logger, *&configPath)
 
 	//Command line value takes precedence over config value
-	conf.Port = port
+	conf.Props.Port = port
 
-	server.StartServer(logger, port)
+	server.StartServer(logger, conf)
 }
