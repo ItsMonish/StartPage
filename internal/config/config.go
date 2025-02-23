@@ -9,10 +9,15 @@ import (
 )
 
 type Configuration struct {
-	Port  int                       `yaml:"port"`
+	Props Properties                `yaml:"properties"`
 	Rss   map[string][]TitleURLItem `yaml:"rss"`
 	Yt    []TitleURLItem            `yaml:"youtube"`
 	Links QuickLinks                `yaml:"quicklinks"`
+}
+
+type Properties struct {
+	Port            int `yaml:"port"`
+	RefreshInterval int `yaml:"refreshInterval"`
 }
 
 type TitleURLItem struct {
