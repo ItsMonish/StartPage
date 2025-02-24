@@ -1,3 +1,15 @@
+window.onload = function() {
+  document.getElementById("search-query").addEventListener("keypress", function(ev) {
+    if (ev.key == "Enter") searchDDG();
+  });
+}
+
+function searchDDG() {
+  let query = document.getElementById("search-query").value;
+  window.location.href = "https://duckduckgo.com/?q=" + query;
+  document.getElementById("search-query").value = "";
+}
+
 function toggleRSS() {
   const transition = document.getElementById('transition');
   const rssFeed = document.getElementById('rss-feed');
