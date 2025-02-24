@@ -22,7 +22,7 @@ func StartServer(logger *log.Logger, conf config.Configuration) {
 
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		templateObject := template.Must(template.ParseFiles("./template/startpage.html"))
-		templateObject.Execute(w, nil)
+		templateObject.Execute(w, conf.Links)
 	})
 
 	clientServer := &http.Server{

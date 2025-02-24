@@ -30,35 +30,51 @@
 
         <div class="favorites">
             <div class="column">
-                <h2>Category 1</h2>
+                {{ if ne .List1Name ""}}
+                <h2>{{ .List1Name }}</h2>
+                {{ else }}
+                <h2>List 1</h2>
+                {{ end }}
                 <ul>
-                    <li><a href="#">Favorite 1</a></li>
-                    <li><a href="#">Favorite 2</a></li>
-                    <li><a href="#">Favorite 3</a></li>
+                    {{ range .List1 }}
+                    <li><a href="{{ .Url }}">{{ .Title }}</a></li>
+                    {{ end }}
                 </ul>
             </div>
             <div class="column">
-                <h2>Category 2</h2>
+                {{ if ne .List2Name ""}}
+                <h2>{{ .List2Name }}</h2>
+                {{ else }}
+                <h2>List 2</h2>
+                {{ end }}
                 <ul>
-                    <li><a href="#">Favorite 1</a></li>
-                    <li><a href="#">Favorite 2</a></li>
-                    <li><a href="#">Favorite 3</a></li>
+                    {{ range .List2 }}
+                    <li><a href="{{ .Url }}">{{ .Title }}</a></li>
+                    {{ end }}
                 </ul>
             </div>
             <div class="column">
-                <h2>Category 3</h2>
+                {{ if ne .List3Name ""}}
+                <h2>{{ .List3Name }}</h2>
+                {{ else }}
+                <h2>List 3</h2>
+                {{ end }}
                 <ul>
-                    <li><a href="#">Favorite 1</a></li>
-                    <li><a href="#">Favorite 2</a></li>
-                    <li><a href="#">Favorite 3</a></li>
+                    {{ range .List3 }}
+                    <li><a href="{{ .Url }}">{{ .Title }}</a></li>
+                    {{ end }}
                 </ul>
             </div>
             <div class="column">
-                <h2>Category 4</h2>
+                {{ if ne .List4Name ""}}
+                <h2>{{ .List4Name }}</h2>
+                {{ else }}
+                <h2>List 4</h2>
+                {{ end }}
                 <ul>
-                    <li><a href="#">Favorite 1</a></li>
-                    <li><a href="#">Favorite 2</a></li>
-                    <li><a href="#">Favorite 3</a></li>
+                    {{ range .List4 }}
+                    <li><a href="{{ .Url }}">{{ .Title }}</a></li>
+                    {{ end }}
                 </ul>
             </div>
         </div>
