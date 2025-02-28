@@ -27,7 +27,7 @@ func main() {
 
 	flag.Parse()
 
-	conf := config.GetConfig(logger, *&configPath)
+	conf := config.GetConfig(logger, configPath)
 
 	//Command line value takes precedence over config value
 	conf.Props.Port = port
