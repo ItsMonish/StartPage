@@ -152,6 +152,7 @@ select {
 #feed-list {
   overflow: hidden scroll;
   height: 85vh;
+  padding-left: 60px;
 }
 
 /* RSS Feed Item */
@@ -172,12 +173,15 @@ select {
 .feed-item h3 {
   margin-bottom: 10px;
   color: #00bcd4;
+  padding-left: 10px;
 }
 
 .feed-item p {
   color: #bbb;
+  padding-left: 5px;
 }
 
 .feed-item p strong {
   color: #fff;
+  padding-left: 5px;
 }
