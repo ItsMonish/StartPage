@@ -2,15 +2,20 @@ package server
 
 import (
 	"html/template"
+	"io"
 	"log"
 	"net/http"
 	"os"
 	"os/signal"
 	"strconv"
 	"syscall"
+	"time"
 
+	"github.com/ItsMonish/StartPage/internal/collector"
 	"github.com/ItsMonish/StartPage/internal/config"
 )
+
+var jsonRssFeed string
 
 func StartServer(logger *log.Logger, conf config.Configuration) {
 
@@ -25,16 +30,24 @@ func StartServer(logger *log.Logger, conf config.Configuration) {
 		templateObject.Execute(w, conf.Links)
 	})
 
+	mux.HandleFunc("/rss", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Add("Content-Type", "application/json")
+		io.WriteString(w, jsonRssFeed)
+	})
+
 	clientServer := &http.Server{
 		Addr:    ":" + strconv.Itoa(conf.Props.Port),
 		Handler: mux,
 	}
 
 	quitServer := make(chan os.Signal, 1)
+	stopRoutine := make(chan bool, 1)
 	signal.Notify(quitServer, syscall.SIGTERM, syscall.SIGABRT, syscall.SIGINT)
 
 	go func() {
 		<-quitServer
+
+		stopRoutine <- true
 
 		logger.Println("Server closing due to signal interrupt")
 
@@ -45,9 +58,39 @@ func StartServer(logger *log.Logger, conf config.Configuration) {
 		/* Include actions to be performed before server closes */
 	}()
 
+	go startServerRoutine(logger, stopRoutine, conf)
+
 	logger.Println("Server starting at: ", conf.Props.Port)
 
 	if err := clientServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 		logger.Fatal("Server failed to start on port: ", conf.Props.Port)
+	}
+}
+
+func updateWithInterval(interval int) time.Time {
+	return time.Now().Add(time.Duration(interval) * time.Minute)
+}
+
+func startServerRoutine(logger *log.Logger, stopRoutine chan bool, conf config.Configuration) {
+	nextRefresh := updateWithInterval(conf.Props.RefreshInterval)
+
+	jsonRssFeed = collector.CollectRssFeed(logger, conf.Rss)
+	logger.Println("Collecting from RSS sources")
+
+	for {
+		select {
+		case <-stopRoutine:
+			logger.Println("Stopping server routine")
+			return
+		default:
+			if time.Now().After(nextRefresh) {
+				logger.Println("Collecting from RSS sources")
+				jsonRssFeed = collector.CollectRssFeed(logger, conf.Rss)
+
+				nextRefresh = updateWithInterval(conf.Props.RefreshInterval)
+			} else {
+				time.Sleep(time.Minute)
+			}
+		}
 	}
 }
