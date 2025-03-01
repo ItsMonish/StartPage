@@ -41,7 +41,7 @@ function renderJsonInList(jsonRssFeed) {
     let header = document.createElement("h3");
     header.innerText = curObj.title;
     let src = document.createElement("p");
-    src.innerHTML = "<strong>Source:</strong> " + curObj.source;
+    src.innerHTML = "<strong>Source:</strong> " + curObj.source + " / " + titleCase(curObj.category);
     let pubdate = document.createElement("p");
     pubdate.innerHTML = "<strong>Published:</strong> " + prettyDate(curObj.pubDate);
     newNode.appendChild(header);
