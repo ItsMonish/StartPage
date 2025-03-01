@@ -36,7 +36,7 @@ function renderRSS() {
         let src = document.createElement("p")
         src.innerHTML = "<strong>Source:</strong> " + curObj.source;
         let pubdate = document.createElement("p")
-        pubdate.innerHTML = "<strong>Published:</strong> " + curObj.pubDate;
+        pubdate.innerHTML = "<strong>Published:</strong> " + prettyDate(curObj.pubDate);
         newNode.appendChild(header)
         newNode.appendChild(src)
         newNode.appendChild(pubdate)
@@ -117,4 +117,16 @@ function titleCase(s) {
     .split(' ')
     .map(word => word.charAt(0).toUpperCase() + word.slice(1))
     .join(' ');
+}
+
+function prettyDate(pubDate) {
+  const date = new Date(pubDate);
+
+  const day = String(date.getDate()).padStart(2, '0');
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const year = date.getFullYear();
+  const hours = String(date.getHours()).padStart(2, '0');
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+
+  return `${day}/${month}/${year} ${hours}:${minutes}`;
 }
