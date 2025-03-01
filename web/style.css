@@ -149,6 +149,11 @@ select {
   margin: 10px;
 }
 
+#feed-list {
+  overflow: hidden scroll;
+  height: 85vh;
+}
+
 /* RSS Feed Item */
 .feed-item {
   background-color: #333;
@@ -161,6 +166,7 @@ select {
 .feed-item:hover {
   transform: scale(1.02);
   background-color: #444;
+  cursor: pointer;
 }
 
 .feed-item h3 {

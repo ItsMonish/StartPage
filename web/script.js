@@ -59,13 +59,13 @@ function toggleRSS() {
     if (mainPage.style.display != 'none') {
       // Show RSS Feed, hide main page
       rssFeed.classList.add('show');
-      rssFeed.style.display = 'block';
+      //rssFeed.style.display = 'block';
       mainPage.style.display = 'none';
       rssIcon.innerHTML = '&#x1F50D;';
     } else {
       // Hide RSS Feed, show main page
       rssFeed.classList.remove('show');
-      rssFeed.style.display = 'none';
+      //rssFeed.style.display = 'none';
       mainPage.style.display = 'flex';
       rssIcon.innerHTML = '&#x1F4F0;';
     }
