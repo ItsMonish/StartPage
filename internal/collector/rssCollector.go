@@ -31,11 +31,26 @@ type JsonFeedItem struct {
 	Source  string    `json:"source"`
 }
 
-func CollectRssFeed(logger *log.Logger, rssList map[string][]config.TitleURLItem) string {
+var (
+	rssJsonItems    []JsonFeedItem
+	rssJsonString   string
+	sources         map[string][]string
+	sourcesAsString string
+)
+
+func RefreshRssFeed(logger *log.Logger, rssList map[string][]config.TitleURLItem) {
 	var xmlFeeds []XmlRssFeed
 
+	if sources == nil {
+		sources = make(map[string][]string)
+	}
+
 	for category, items := range rssList {
+
 		for _, item := range items {
+
+			sources[category] = append(sources[category], item.Title)
+
 			resp, err := http.Get(item.Url)
 
 			if err != nil {
@@ -60,8 +75,6 @@ func CollectRssFeed(logger *log.Logger, rssList map[string][]config.TitleURLItem
 		}
 	}
 
-	var jsonItems []JsonFeedItem
-
 	for _, feedItem := range xmlFeeds {
 		src := feedItem.Source
 
@@ -80,19 +93,43 @@ func CollectRssFeed(logger *log.Logger, rssList map[string][]config.TitleURLItem
 				item.PubDate, _ = time.Parse(time.RFC1123, feed.PubDate)
 			}
 
-			jsonItems = append(jsonItems, item)
+			rssJsonItems = append(rssJsonItems, item)
 		}
 	}
 
-	sort.SliceStable(jsonItems, func(i, j int) bool {
-		return jsonItems[i].PubDate.After(jsonItems[j].PubDate)
+	sort.SliceStable(rssJsonItems, func(i, j int) bool {
+		return rssJsonItems[i].PubDate.After(rssJsonItems[j].PubDate)
 	})
 
-	jsonContent, err := json.Marshal(jsonItems)
+	jsonContent, err := json.Marshal(rssJsonItems)
 
 	if err != nil {
 		logger.Println("Error in Marshalling JSON for RSS")
 	}
 
-	return string(jsonContent)
+	rssJsonString = string(jsonContent)
+
+	if err != nil {
+		logger.Println("Error in Marshalling JSON for Sources")
+	}
+
+	sourcesCont, err := json.Marshal(sources)
+
+	sourcesAsString = string(sourcesCont)
+}
+
+func GetSourcesAsObj() map[string][]string {
+	return sources
+}
+
+func GetSourcesAsStr() string {
+	return sourcesAsString
+}
+
+func CollectRssAsJson() string {
+	return rssJsonString
+}
+
+func CollectRssAsObj() []JsonFeedItem {
+	return rssJsonItems
 }
