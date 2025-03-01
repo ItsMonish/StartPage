@@ -32,7 +32,12 @@ func StartServer(logger *log.Logger, conf config.Configuration) {
 
 	mux.HandleFunc("/rss", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Add("Content-Type", "application/json")
-		io.WriteString(w, jsonRssFeed)
+		io.WriteString(w, collector.CollectRssAsJson())
+	})
+
+	mux.HandleFunc("/rss/srcs", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Add("Content-Type", "application/json")
+		io.WriteString(w, collector.GetSourcesAsStr())
 	})
 
 	clientServer := &http.Server{
@@ -74,7 +79,7 @@ func updateWithInterval(interval int) time.Time {
 func startServerRoutine(logger *log.Logger, stopRoutine chan bool, conf config.Configuration) {
 	nextRefresh := updateWithInterval(conf.Props.RefreshInterval)
 
-	jsonRssFeed = collector.CollectRssFeed(logger, conf.Rss)
+	collector.RefreshRssFeed(logger, conf.Rss)
 	logger.Println("Collecting from RSS sources")
 
 	for {
@@ -85,7 +90,7 @@ func startServerRoutine(logger *log.Logger, stopRoutine chan bool, conf config.C
 		default:
 			if time.Now().After(nextRefresh) {
 				logger.Println("Collecting from RSS sources")
-				jsonRssFeed = collector.CollectRssFeed(logger, conf.Rss)
+				collector.RefreshRssFeed(logger, conf.Rss)
 
 				nextRefresh = updateWithInterval(conf.Props.RefreshInterval)
 			} else {

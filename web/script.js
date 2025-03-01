@@ -2,6 +2,7 @@ window.onload = function() {
   document.getElementById("search-query").addEventListener("keypress", function(ev) {
     if (ev.key == "Enter") searchDDG();
   });
+  renderSources();
   renderRSS();
 }
 
@@ -43,6 +44,42 @@ function renderRSS() {
         feedList.appendChild(newNode)
       }
     })
+    .catch(error => {
+      console.log("Error: " + error)
+    });
+}
+
+function renderSources() {
+  fetch("/rss/srcs")
+    .then(response => {
+      if (!response.ok) {
+        throw new Error("Error collection RSS feed response");
+      }
+      return response.json();
+    })
+    .then(jsonSources => {
+      let catFilter = document.getElementById("category-filter");
+      catFilter.innerHTML = "";
+      let allOption = document.createElement("option");
+      allOption.setAttribute("value", "all");
+      allOption.innerText = "All Categories";
+      catFilter.appendChild(allOption);
+
+      for (let category of Object.keys(jsonSources)) {
+        let catSources = document.createElement("option");
+        catSources.setAttribute("value", category);
+        catSources.innerText = titleCase(category);
+        catFilter.appendChild(catSources);
+
+        for (let source of jsonSources[category]) {
+          let sourceNode = document.createElement("option");
+          sourceNode.setAttribute("value", `${category}/${source}`);
+          sourceNode.innerText = titleCase(category) + " - " + titleCase(source);
+
+          catFilter.appendChild(sourceNode);
+        }
+      }
+    });
 }
 
 function toggleRSS() {
@@ -75,3 +112,9 @@ function toggleRSS() {
   }, 300); // Match the transition duration
 }
 
+function titleCase(s) {
+  return s.toLowerCase()
+    .split(' ')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+}
