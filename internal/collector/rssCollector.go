@@ -3,6 +3,7 @@ package collector
 import (
 	"encoding/json"
 	"encoding/xml"
+	"errors"
 	"io"
 	"log"
 	"net/http"
@@ -25,10 +26,11 @@ type XmlRssFeed struct {
 }
 
 type JsonFeedItem struct {
-	Title   string    `json:"title"`
-	Link    string    `json:"link"`
-	PubDate time.Time `json:"pubDate"`
-	Source  string    `json:"source"`
+	Title    string    `json:"title"`
+	Link     string    `json:"link"`
+	PubDate  time.Time `json:"pubDate"`
+	Source   string    `json:"source"`
+	Category string    `json:"category"`
 }
 
 var (
@@ -36,6 +38,8 @@ var (
 	rssJsonString   string
 	sources         map[string][]string
 	sourcesAsString string
+
+	sourceFeed map[string][]JsonFeedItem
 )
 
 func RefreshRssFeed(logger *log.Logger, rssList map[string][]config.TitleURLItem) {
@@ -43,6 +47,9 @@ func RefreshRssFeed(logger *log.Logger, rssList map[string][]config.TitleURLItem
 
 	if sources == nil {
 		sources = make(map[string][]string)
+	}
+	if sourceFeed == nil {
+		sourceFeed = make(map[string][]JsonFeedItem)
 	}
 
 	for category, items := range rssList {
@@ -77,6 +84,7 @@ func RefreshRssFeed(logger *log.Logger, rssList map[string][]config.TitleURLItem
 
 	for _, feedItem := range xmlFeeds {
 		src := feedItem.Source
+		category := feedItem.Category
 
 		for _, feed := range feedItem.Feed {
 			var item JsonFeedItem
@@ -84,6 +92,7 @@ func RefreshRssFeed(logger *log.Logger, rssList map[string][]config.TitleURLItem
 			item.Source = src
 			item.Title = feed.Title
 			item.Link = feed.Link
+			item.Category = category
 
 			var err error
 
@@ -94,6 +103,8 @@ func RefreshRssFeed(logger *log.Logger, rssList map[string][]config.TitleURLItem
 			}
 
 			rssJsonItems = append(rssJsonItems, item)
+
+			sourceFeed[src] = append(sourceFeed[src], item)
 		}
 	}
 
@@ -116,6 +127,23 @@ func RefreshRssFeed(logger *log.Logger, rssList map[string][]config.TitleURLItem
 	sourcesCont, err := json.Marshal(sources)
 
 	sourcesAsString = string(sourcesCont)
+
+	//for cat, srcs := range sources {
+	//	logger.Println("category", cat)
+	//	for _, src := range srcs {
+	//		logger.Println("\t", src)
+	//		for _, item := range sourceFeed[src] {
+	//			logger.Println("\t\t", item.Link)
+	//		}
+	//	}
+	//}
+
+	//for cat, items := range sourceFeed {
+	//	logger.Println("category", cat)
+	//	for _, item := range items {
+	//		logger.Println("item", item)
+	//	}
+	//}
 }
 
 func GetSourcesAsObj() map[string][]string {
@@ -132,4 +160,41 @@ func CollectRssAsJson() string {
 
 func CollectRssAsObj() []JsonFeedItem {
 	return rssJsonItems
+}
+
+func GetSourceFeed(source string) (string, error) {
+	jsonFeed, ok := sourceFeed[source]
+
+	if !ok {
+		return "", errors.New("not found")
+	}
+
+	jsonCont, _ := json.Marshal(jsonFeed)
+
+	return string(jsonCont), nil
+
+}
+
+func GetCategoryFeed(category string) (string, error) {
+	sources, ok := sources[category]
+
+	if !ok {
+		return "", errors.New("not found")
+	}
+
+	var categoryFeed []JsonFeedItem
+
+	for _, source := range sources {
+		for _, item := range sourceFeed[source] {
+			categoryFeed = append(categoryFeed, item)
+		}
+	}
+
+	sort.SliceStable(categoryFeed, func(i, j int) bool {
+		return categoryFeed[i].PubDate.After(categoryFeed[j].PubDate)
+	})
+
+	jsonCont, _ := json.Marshal(categoryFeed)
+
+	return string(jsonCont), nil
 }

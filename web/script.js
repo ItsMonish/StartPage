@@ -2,6 +2,9 @@ window.onload = function() {
   document.getElementById("search-query").addEventListener("keypress", function(ev) {
     if (ev.key == "Enter") searchDDG();
   });
+  document.getElementById("category-filter").addEventListener("change", function(ev) {
+    activateFilter(document.getElementById("category-filter").value);
+  });
   renderSources();
   renderRSS();
 }
@@ -12,8 +15,41 @@ function searchDDG() {
   document.getElementById("search-query").value = "";
 }
 
-function newTab(url) {
-  window.open(url, '_blank').focus();
+function activateFilter(val) {
+  fetch("/rss/" + val)
+    .then(response => {
+      if (!response.ok) {
+        throw new Error("Error collection RSS feed with filter " + val);
+      }
+      return response.json();
+    })
+    .then(jsonRssFeed => {
+      renderJsonInList(jsonRssFeed)
+    })
+    .catch(error => {
+      console.log(error)
+    });
+}
+
+function renderJsonInList(jsonRssFeed) {
+  let feedList = document.getElementById("feed-list");
+  feedList.innerHTML = "";
+  for (let idx = 0; idx < jsonRssFeed.length; idx++) {
+    let curObj = jsonRssFeed[idx];
+    let newNode = document.createElement("div");
+    newNode.classList.add("feed-item");
+    let header = document.createElement("h3");
+    header.innerText = curObj.title;
+    let src = document.createElement("p");
+    src.innerHTML = "<strong>Source:</strong> " + curObj.source;
+    let pubdate = document.createElement("p");
+    pubdate.innerHTML = "<strong>Published:</strong> " + prettyDate(curObj.pubDate);
+    newNode.appendChild(header);
+    newNode.appendChild(src);
+    newNode.appendChild(pubdate);
+    newNode.setAttribute("onclick", `newTab("${curObj.link}");`);
+    feedList.appendChild(newNode);
+  }
 }
 
 function renderRSS() {
@@ -25,27 +61,10 @@ function renderRSS() {
       return response.json();
     })
     .then(jsonRssFeed => {
-      let feedList = document.getElementById("feed-list");
-      feedList.innerHTML = "";
-      for (let idx = 0; idx < jsonRssFeed.length; idx++) {
-        let curObj = jsonRssFeed[idx];
-        let newNode = document.createElement("div");
-        newNode.classList.add("feed-item");
-        let header = document.createElement("h3");
-        header.innerText = curObj.title;
-        let src = document.createElement("p")
-        src.innerHTML = "<strong>Source:</strong> " + curObj.source;
-        let pubdate = document.createElement("p")
-        pubdate.innerHTML = "<strong>Published:</strong> " + prettyDate(curObj.pubDate);
-        newNode.appendChild(header)
-        newNode.appendChild(src)
-        newNode.appendChild(pubdate)
-        newNode.setAttribute("onclick", `newTab("${curObj.link}");`);
-        feedList.appendChild(newNode)
-      }
+      renderJsonInList(jsonRssFeed)
     })
     .catch(error => {
-      console.log("Error: " + error)
+      console.log(error)
     });
 }
 
@@ -79,6 +98,9 @@ function renderSources() {
           catFilter.appendChild(sourceNode);
         }
       }
+    })
+    .catch(error => {
+      console.log(error);
     });
 }
 
@@ -110,6 +132,10 @@ function toggleRSS() {
     // Remove the transition effect class after switching
     transition.classList.remove('transition-active');
   }, 300); // Match the transition duration
+}
+
+function newTab(url) {
+  window.open(url, '_blank').focus();
 }
 
 function titleCase(s) {
