@@ -1,33 +1,42 @@
-/* Basic Reset */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
-/* Full viewport size */
 html,
 body {
   height: 100%;
   width: 100%;
   background-color: #060606;
-  /* Dark mode */
   color: #fff;
   font-family: Arial, sans-serif;
   overflow: hidden;
+  transition: background-color 0.5s ease;
 }
 
-/* Centered container for the search bar */
-.container {
-  display: flex;
+#search-page {
+  flex-direction: column;
+  background-color: #060606;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  text-align: center;
+  padding-left: 4vw;
+  padding-top: 1vw;
+}
+
+#youtube-page {
+  background: linear-gradient(90deg, #5c0009, #7e000d);
   flex-direction: column;
   justify-content: center;
   align-items: center;
   height: 100%;
   text-align: center;
+  padding-left: 4vw;
+  padding-top: 1vw;
 }
 
-/* Search bar */
 .search-bar {
   width: 60%;
   max-width: 700px;
@@ -44,7 +53,6 @@ body {
   border-color: #0066cc;
 }
 
-/* Favorites Section */
 .favorites {
   padding-top: 10vh;
   display: flex;
@@ -87,59 +95,102 @@ body {
   text-decoration: underline;
 }
 
-/* RSS Feed Icon */
-.rss-icon {
+.icon-bar {
   position: absolute;
-  left: 20px;
-  top: 50%;
-  transform: translateY(-50%);
-  font-size: 30px;
-  color: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.icon-bar div {
+  padding: 10px;
   cursor: pointer;
-  transition: transform 0.3s;
+  border-radius: 5px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  transition: background-color 0.3s ease;
 }
 
-/* Hover effect for RSS icon */
-.rss-icon:hover {
-  transform: translateY(-50%) scale(1.05);
-  /* Subtle scaling */
+.icon-bar div:hover {
+  transform: scale(1.1);
 }
 
-/* Page Transition */
-.transition {
-  position: fixed;
-  left: 20px;
-  /* Position transition relative to RSS icon */
-  top: 50%;
-  width: 100vw;
-  height: 100vh;
+.search-icon {
+  background-color: #060606;
+}
+
+.rss-icon {
+  background-color: #2a2a2a;
+}
+
+.youtube-icon {
+  background-color: #5c0009;
+}
+
+.notification-bubble {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  width: 20px;
+  height: 20px;
+  background-color: #f44336;
+  color: white;
+  font-size: 12px;
+  font-weight: bold;
   border-radius: 50%;
-  background-color: #161616;
-  transform: translate(-50%, -50%) scale(0);
-  z-index: 1000;
-  transition: transform 0.6s ease-out;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
-.transition-active {
-  transform: translate(-50%, -50%) scale(5);
-}
-
-/* RSS Feed Page */
-#rss-feed {
+.page {
   display: none;
-  opacity: 0;
   transition: opacity 0.5s ease-in-out;
-  background: linear-gradient(45deg, #2a2a2a, #444);
-  border-radius: 10px;
-  padding: 20px;
+  opacity: 0;
 }
 
-#rss-feed.show {
+.active-page {
+  display: flex;
+  opacity: 1;
+}
+
+.card {
+  left: 0vw;
+  right: 20vw;
+  height: 33.3vh;
+}
+
+.search-card {
+  background-color: #060606;
+}
+
+.rss-card {
+  background-color: #2a2a2a;
+}
+
+.yt-card {
+  background-color: #5c0009;
+}
+
+#rss-page {
+  display: none;
+  justify-content: left;
+  text-align: left;
+  opacity: 0;
+  background: linear-gradient(90deg, #2a2a2a, #383838);
+  border-radius: 10px;
+  width: 100vw;
+  padding-left: 4vw;
+  padding-top: 1vw;
+}
+
+#rss-page.active-page {
   display: block;
   opacity: 1;
 }
 
-/* Dropdown filters */
 select {
   background-color: #333;
   color: #fff;
@@ -151,11 +202,10 @@ select {
 
 #feed-list {
   overflow: hidden scroll;
-  height: 85vh;
-  padding-left: 60px;
+  height: 88vh;
+  padding-left: 20px;
 }
 
-/* RSS Feed Item */
 .feed-item {
   background-color: #333;
   padding: 15px;

@@ -15,17 +15,27 @@
 
 <body>
 
-    <!-- Page Transition Element -->
-    <div class="transition" id="transition"></div>
-
-    <!-- RSS Feed Toggle Icon -->
-    <div class="rss-icon" onclick="toggleRSS()">
-        &#x1F4F0; <!-- RSS icon (Unicode) -->
+    <div class="icon-bar">
+        <div class="card search-card" onclick="changePage('search')">
+            <div class="search-icon">
+                <img width="24" height="24" src="/assets/search-ico.png" />
+            </div>
+        </div>
+        <div class="card rss-card" onclick="changePage('rss')">
+            <div class="rss-icon">
+                <img width="24" height="24" src="/assets/rss-ico.png" />
+                <span id="rss-bubble" class="notification-bubble">5</span>
+            </div>
+        </div>
+        <div class="card yt-card" onclick="changePage('youtube')">
+            <div class="youtube-icon">
+                <img width="24" height="24" src="/assets/youtube-ico.png" />
+                <span id="youtube-bubble" class="notification-bubble">2</span>
+            </div>
+        </div>
     </div>
 
-    <!-- Main Page Content -->
-    <div class="container">
-        <!-- Search Bar -->
+    <div id="search-page" class="page active-page">
         <input class="search-bar" id="search-query" type="text" placeholder="Search..." />
 
         <div class="favorites">
@@ -80,11 +90,9 @@
         </div>
     </div>
 
-    <!-- RSS Feed Page (hidden by default) -->
-    <div id="rss-feed">
+    <div id="rss-page" class="page">
         <h1>RSS Feed</h1>
 
-        <!-- Dropdown Filters -->
         <select id="category-filter">
             <option value="all">All Categories</option>
             <option value="news">News</option>
@@ -98,7 +106,6 @@
             <option value="unread">Unread</option>
         </select>
 
-        <!-- Placeholder Feed Entries -->
         <div id="feed-list">
             <div class="feed-item">
                 <h3>Feed Title 1</h3>
@@ -112,6 +119,23 @@
             </div>
         </div>
     </div>
+
+    <div id="youtube-page" class="page">
+        <h1>YouTube Page</h1>
+        <p>This is the YouTube page. Explore videos here.</p>
+    </div>
+
+    <script>
+        function changePage(page) {
+            const pages = document.querySelectorAll('.page');
+            pages.forEach(p => {
+                p.classList.remove('active-page');
+            });
+
+            const selectedPage = document.getElementById(`${page}-page`);
+            selectedPage.classList.add('active-page');
+        }
+    </script>
 
     <script src="/assets/script.js"></script>
 
