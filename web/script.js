@@ -44,9 +44,14 @@ function renderJsonInList(jsonRssFeed) {
     src.innerHTML = "<strong>Source:</strong> " + curObj.source + " / " + titleCase(curObj.category);
     let pubdate = document.createElement("p");
     pubdate.innerHTML = "<strong>Published:</strong> " + prettyDate(curObj.pubDate);
+    let markIcon = document.createElement("button");
+    markIcon.innerHTML = `&#x1F441`;
+    markIcon.setAttribute("onclick", `event.stopPropagation();markAsRead(this, ${curObj.id}, true);`);
+    markIcon.classList.add("right-button")
     newNode.appendChild(header);
     newNode.appendChild(src);
     newNode.appendChild(pubdate);
+    newNode.appendChild(markIcon);
     newNode.setAttribute("onclick", `newTab(this,"${curObj.id}" ,"${curObj.link}");`);
     feedList.appendChild(newNode);
   }
@@ -105,6 +110,25 @@ function renderSources() {
     });
 }
 
+function markAsRead(caller, id, btn) {
+  fetch(`/rss/${id}/read`)
+    .then(response => {
+      if (!response.ok) {
+        throw new Error("Error updating history");
+      }
+      if (!btn) {
+        caller.remove();
+      } else {
+        caller.parentElement.remove();
+      }
+      document.getElementById("rss-bubble").innerText = document.getElementById("rss-bubble").innerText - 1;
+      return
+    })
+    .catch(err => {
+      console.log(err)
+    })
+}
+
 function changePage(page) {
   const pages = document.querySelectorAll('.page');
   pages.forEach(p => {
@@ -116,18 +140,7 @@ function changePage(page) {
 }
 
 function newTab(caller, id, url) {
-  fetch(`/rss/${id}/read`)
-    .then(response => {
-      if (!response.ok) {
-        throw new Error("Error updating history");
-      }
-      caller.remove();
-      document.getElementById("rss-bubble").innerText = document.getElementById("rss-bubble").innerText - 1;
-      return
-    })
-    .catch(err => {
-      console.log(err)
-    })
+  markAsRead(caller, id, false);
   window.open(url, '_blank').focus();
 }
 
