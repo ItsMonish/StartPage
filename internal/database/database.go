@@ -6,7 +6,6 @@ import (
 	"os"
 	"time"
 
-	"github.com/ItsMonish/StartPage/internal/collector"
 	_ "github.com/mattn/go-sqlite3"
 )
 
@@ -14,7 +13,16 @@ const DB_FILE = "config/database.db"
 
 var dbInstance *sql.DB
 
-func AddToHistory(rssItem collector.JsonFeedItem) error {
+type DatabaseFeedItem struct {
+	ID       int
+	Title    string
+	Link     string
+	PubDate  time.Time
+	Source   string
+	Category string
+}
+
+func AddToHistory(rssItem DatabaseFeedItem) error {
 	db, err := getDatabaseInstance()
 
 	if err != nil {
@@ -62,13 +70,26 @@ func AddToHistory(rssItem collector.JsonFeedItem) error {
 		return errors.New("Error inserting into History table")
 	}
 
-	err = collector.RemoveFromList(rssItem.ID)
+	return nil
+}
+
+func IsItemInHistory(link string) (bool, error) {
+	db, err := getDatabaseInstance()
 
 	if err != nil {
-		return err
+		return false, errors.New("Error getting database instance")
 	}
 
-	return nil
+	row := db.QueryRow("SELECT url FROM RssHistory WHERE url=?", link)
+
+	var u string
+	err = row.Scan(&u)
+
+	if err == nil {
+		return true, nil
+	}
+
+	return false, nil
 }
 
 func getDatabaseInstance() (*sql.DB, error) {

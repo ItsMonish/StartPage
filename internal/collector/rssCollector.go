@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/ItsMonish/StartPage/internal/config"
+	"github.com/ItsMonish/StartPage/internal/database"
 )
 
 type XmlRssItem struct {
@@ -97,8 +98,6 @@ func RefreshRssFeed(logger *log.Logger, rssList map[string][]config.TitleURLItem
 			item.Category = category
 			item.ID = CurrentId
 
-			CurrentId += 1
-
 			var err error
 
 			item.PubDate, err = time.Parse(time.RFC1123Z, feed.PubDate)
@@ -107,9 +106,13 @@ func RefreshRssFeed(logger *log.Logger, rssList map[string][]config.TitleURLItem
 				item.PubDate, _ = time.Parse(time.RFC1123, feed.PubDate)
 			}
 
-			rssJsonItems = append(rssJsonItems, item)
-
-			sourceFeed[src] = append(sourceFeed[src], item)
+			if truth, err := database.IsItemInHistory(item.Link); !truth {
+				rssJsonItems = append(rssJsonItems, item)
+				sourceFeed[src] = append(sourceFeed[src], item)
+				CurrentId += 1
+			} else if err != nil {
+				logger.Println(err)
+			}
 		}
 	}
 

@@ -84,13 +84,27 @@ func StartServer(logger *log.Logger, conf config.Configuration) {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
-		err = database.AddToHistory(item)
+		var dbItem database.DatabaseFeedItem
+		dbItem.ID = item.ID
+		dbItem.Title = item.Title
+		dbItem.Link = item.Link
+		dbItem.Source = item.Source
+		dbItem.Category = item.Category
+		dbItem.PubDate = item.PubDate
+
+		err = database.AddToHistory(dbItem)
 		if err != nil {
 			logger.Println(err)
 			logger.Println("Error in adding to history")
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
+		err = collector.RemoveFromList(id)
+
+		if err != nil {
+			logger.Println(err)
+		}
+
 		w.WriteHeader(http.StatusOK)
 
 	})
