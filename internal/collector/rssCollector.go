@@ -7,6 +7,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"slices"
 	"sort"
 	"time"
 
@@ -26,6 +27,7 @@ type XmlRssFeed struct {
 }
 
 type JsonFeedItem struct {
+	ID       int       `json:"id"`
 	Title    string    `json:"title"`
 	Link     string    `json:"link"`
 	PubDate  time.Time `json:"pubDate"`
@@ -38,8 +40,8 @@ var (
 	rssJsonString   string
 	sources         map[string][]string
 	sourcesAsString string
-
-	sourceFeed map[string][]JsonFeedItem
+	sourceFeed      map[string][]JsonFeedItem
+	CurrentId       int = 0
 )
 
 func RefreshRssFeed(logger *log.Logger, rssList map[string][]config.TitleURLItem) {
@@ -93,6 +95,9 @@ func RefreshRssFeed(logger *log.Logger, rssList map[string][]config.TitleURLItem
 			item.Title = feed.Title
 			item.Link = feed.Link
 			item.Category = category
+			item.ID = CurrentId
+
+			CurrentId += 1
 
 			var err error
 
@@ -197,4 +202,39 @@ func GetCategoryFeed(category string) (string, error) {
 	jsonCont, _ := json.Marshal(categoryFeed)
 
 	return string(jsonCont), nil
+}
+
+func GetRSSItem(id int) (JsonFeedItem, error) {
+	for _, item := range rssJsonItems {
+		if item.ID == id {
+			return item, nil
+		}
+	}
+	return *new(JsonFeedItem), errors.New("Item not found")
+}
+
+func RemoveFromList(id int) error {
+	idx := 0
+	for ; idx < len(rssJsonItems); idx++ {
+		if rssJsonItems[idx].ID == id {
+			break
+		}
+	}
+	if idx == len(rssJsonItems) {
+		return errors.New("Item not found with id")
+	}
+	item := rssJsonItems[idx]
+	rssJsonItems = slices.Delete(rssJsonItems, idx, idx+1)
+	idx = -1
+	for i, item := range sourceFeed[item.Source] {
+		if item.ID == id {
+			idx = i
+			break
+		}
+	}
+	if idx <= 0 {
+		return nil
+	}
+	sourceFeed[item.Source] = slices.Delete(sourceFeed[item.Source], idx, idx+1)
+	return nil
 }

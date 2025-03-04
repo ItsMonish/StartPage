@@ -47,7 +47,7 @@ function renderJsonInList(jsonRssFeed) {
     newNode.appendChild(header);
     newNode.appendChild(src);
     newNode.appendChild(pubdate);
-    newNode.setAttribute("onclick", `newTab("${curObj.link}");`);
+    newNode.setAttribute("onclick", `newTab(this,"${curObj.id}" ,"${curObj.link}");`);
     feedList.appendChild(newNode);
   }
 }
@@ -115,7 +115,19 @@ function changePage(page) {
   selectedPage.classList.add('active-page');
 }
 
-function newTab(url) {
+function newTab(caller, id, url) {
+  fetch(`/rss/${id}/read`)
+    .then(response => {
+      if (!response.ok) {
+        throw new Error("Error updating history");
+      }
+      caller.remove();
+      document.getElementById("rss-bubble").innerText = document.getElementById("rss-bubble").innerText - 1;
+      return
+    })
+    .catch(err => {
+      console.log(err)
+    })
   window.open(url, '_blank').focus();
 }
 

@@ -13,6 +13,7 @@ import (
 
 	"github.com/ItsMonish/StartPage/internal/collector"
 	"github.com/ItsMonish/StartPage/internal/config"
+	"github.com/ItsMonish/StartPage/internal/database"
 )
 
 var jsonRssFeed string
@@ -69,6 +70,31 @@ func StartServer(logger *log.Logger, conf config.Configuration) {
 		io.WriteString(w, content)
 	})
 
+	mux.HandleFunc("/rss/{id}/read", func(w http.ResponseWriter, r *http.Request) {
+		id, err := strconv.Atoi(r.PathValue("id"))
+		if err != nil {
+			logger.Println("Cannot retrieve item with ID:", id)
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+
+		item, err := collector.GetRSSItem(id)
+		if err != nil {
+			logger.Println("Cannot retrieve item with ID:", id)
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+		err = database.AddToHistory(item)
+		if err != nil {
+			logger.Println(err)
+			logger.Println("Error in adding to history")
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		w.WriteHeader(http.StatusOK)
+
+	})
+
 	clientServer := &http.Server{
 		Addr:    ":" + strconv.Itoa(conf.Props.Port),
 		Handler: mux,
@@ -82,6 +108,8 @@ func StartServer(logger *log.Logger, conf config.Configuration) {
 		<-quitServer
 
 		stopRoutine <- true
+
+		database.CloseDBInstance()
 
 		logger.Println("Server closing due to signal interrupt")
 
