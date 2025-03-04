@@ -47,6 +47,7 @@ function renderJsonInList(jsonRssFeed) {
     let markIcon = document.createElement("button");
     markIcon.innerHTML = `&#x1F441`;
     markIcon.setAttribute("onclick", `event.stopPropagation();markAsRead(this, ${curObj.id}, true);`);
+    markIcon.setAttribute("title", "Mark as Read");
     markIcon.classList.add("right-button")
     newNode.appendChild(header);
     newNode.appendChild(src);
