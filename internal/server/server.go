@@ -106,7 +106,40 @@ func StartServer(logger *log.Logger, conf config.Configuration) {
 		}
 
 		w.WriteHeader(http.StatusOK)
+	})
 
+	mux.HandleFunc("/rss/{category}/viewed", func(w http.ResponseWriter, r *http.Request) {
+		category := r.PathValue("category")
+
+		var returnJson string
+		var err error
+
+		if category == "all" {
+			returnJson, err = database.GetReadItemsAsJson("", "")
+		} else {
+			returnJson, err = database.GetReadItemsAsJson(category, "")
+		}
+
+		if err != nil {
+			logger.Println(err)
+		}
+
+		w.Header().Add("Content-Type", "application/json")
+		io.WriteString(w, returnJson)
+	})
+
+	mux.HandleFunc("/rss/{category}/{source}/viewed", func(w http.ResponseWriter, r *http.Request) {
+		category := r.PathValue("category")
+		source := r.PathValue("source")
+
+		returnJson, err := database.GetReadItemsAsJson(category, source)
+
+		if err != nil {
+			logger.Println(err)
+		}
+
+		w.Header().Add("Content-Type", "application/json")
+		io.WriteString(w, returnJson)
 	})
 
 	clientServer := &http.Server{

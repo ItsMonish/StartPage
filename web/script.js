@@ -3,8 +3,11 @@ window.onload = function() {
     if (ev.key == "Enter") searchDDG();
   });
   document.getElementById("category-filter").addEventListener("change", function(ev) {
-    activateFilter(document.getElementById("category-filter").value);
+    activateFilter();
   });
+  document.getElementById("read-filter").addEventListener("change", function(ev) {
+    activateFilter();
+  })
   renderSources();
   renderRSS();
 }
@@ -15,8 +18,21 @@ function searchDDG() {
   document.getElementById("search-query").value = "";
 }
 
-function activateFilter(val) {
-  fetch("/rss/" + val)
+function activateFilter() {
+  let filter = document.getElementById("category-filter").value;
+  let val = document.getElementById("read-filter").value;
+  let reqUrl = "";
+  if (val == "unread") {
+    reqUrl = "/rss/" + filter;
+  } else if (val == "read") {
+    reqUrl = "/rss/" + filter + "/viewed";
+  } else if (val == "favourites") {
+    //reqUrl = "/rss/" + filter + "/favourites";
+    console.log("yet to implement"); return;
+  } else {
+    console.error("Invalid read filter passed");
+  }
+  fetch(reqUrl)
     .then(response => {
       if (!response.ok) {
         throw new Error("Error collection RSS feed with filter " + val);
@@ -45,15 +61,22 @@ function renderJsonInList(jsonRssFeed) {
     let pubdate = document.createElement("p");
     pubdate.innerHTML = "<strong>Published:</strong> " + prettyDate(curObj.pubDate);
     let markIcon = document.createElement("button");
-    markIcon.innerHTML = `&#x1F441`;
-    markIcon.setAttribute("onclick", `event.stopPropagation();markAsRead(this, ${curObj.id}, true);`);
-    markIcon.setAttribute("title", "Mark as Read");
-    markIcon.classList.add("right-button")
     newNode.appendChild(header);
     newNode.appendChild(src);
     newNode.appendChild(pubdate);
-    newNode.appendChild(markIcon);
-    newNode.setAttribute("onclick", `newTab(this,"${curObj.id}" ,"${curObj.link}");`);
+    if ("readAt" in curObj) {
+      let readAt = document.createElement("p");
+      readAt.innerHTML = "<strong>Read At:</strong> " + prettyDate(curObj.readAt);
+      newNode.appendChild(readAt);
+      newNode.setAttribute("onclick", `window.open("${curObj.link}", '_blank').focus();`);
+    } else {
+      markIcon.innerHTML = `&#x1F441`;
+      markIcon.setAttribute("onclick", `event.stopPropagation();markAsRead(this, ${curObj.id}, true);`);
+      markIcon.setAttribute("title", "Mark as Read");
+      markIcon.classList.add("right-button")
+      newNode.appendChild(markIcon);
+      newNode.setAttribute("onclick", `newTab(this,"${curObj.id}" ,"${curObj.link}");`);
+    }
     feedList.appendChild(newNode);
   }
 }
@@ -153,6 +176,7 @@ function titleCase(s) {
 }
 
 function prettyDate(pubDate) {
+  pubDate = pubDate.split(" ").slice(0, 3).join(" ");
   const date = new Date(pubDate);
 
   const day = String(date.getDate()).padStart(2, '0');

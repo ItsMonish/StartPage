@@ -2,6 +2,7 @@ package database
 
 import (
 	"database/sql"
+	"encoding/json"
 	"errors"
 	"os"
 	"time"
@@ -20,6 +21,16 @@ type DatabaseFeedItem struct {
 	PubDate  time.Time
 	Source   string
 	Category string
+}
+
+type DatabaseFeedReadItem struct {
+	ID       int    `json:"id"`
+	Title    string `json:"title"`
+	Link     string `json:"link"`
+	PubDate  string `json:"pubDate"`
+	ReadAt   string `json:"readAt"`
+	Source   string `json:"source"`
+	Category string `json:"category"`
 }
 
 func AddToHistory(rssItem DatabaseFeedItem) error {
@@ -90,6 +101,48 @@ func IsItemInHistory(link string) (bool, error) {
 	}
 
 	return false, nil
+}
+
+func GetReadItemsAsJson(category string, source string) (string, error) {
+	db, err := getDatabaseInstance()
+
+	if err != nil {
+		return "", errors.New("Error getting database instance")
+	}
+
+	var rows *sql.Rows
+	if category == "" && source == "" {
+		rows, err = db.Query("SELECT * FROM RssHistory")
+		if err != nil {
+			return "{}", nil
+		}
+	} else if source == "" {
+		rows, err = db.Query("SELECT * FROM RssHistory WHERE category=?", category)
+		if err != nil {
+			return "{}", nil
+		}
+	} else {
+		rows, err = db.Query("SELECT * FROM RssHistory WHERE category=? AND source=?", category, source)
+		if err != nil {
+			return "{}", nil
+		}
+	}
+
+	var readItem DatabaseFeedReadItem
+	var returnList []DatabaseFeedReadItem
+
+	for rows.Next() {
+		rows.Scan(&readItem.ID, &readItem.Link, &readItem.Title, &readItem.Source, &readItem.Category, &readItem.PubDate, &readItem.ReadAt)
+		returnList = append(returnList, readItem)
+	}
+
+	jsonContent, err := json.Marshal(returnList)
+
+	if err != nil {
+		return "", errors.New("Error marshalling into json")
+	}
+
+	return string(jsonContent), nil
 }
 
 func getDatabaseInstance() (*sql.DB, error) {
