@@ -84,13 +84,8 @@ func StartServer(logger *log.Logger, conf config.Configuration) {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
-		var dbItem database.DatabaseFeedItem
-		dbItem.ID = item.ID
-		dbItem.Title = item.Title
-		dbItem.Link = item.Link
-		dbItem.Source = item.Source
-		dbItem.Category = item.Category
-		dbItem.PubDate = item.PubDate
+
+		dbItem := convertToDBItem(item)
 
 		err = database.AddToHistory(dbItem)
 		if err != nil {
@@ -140,6 +135,86 @@ func StartServer(logger *log.Logger, conf config.Configuration) {
 
 		w.Header().Add("Content-Type", "application/json")
 		io.WriteString(w, returnJson)
+	})
+
+	mux.HandleFunc("/rss/{category}/readAll", func(w http.ResponseWriter, r *http.Request) {
+		category := r.PathValue("category")
+
+		if category == "all" {
+
+			categoryMap := collector.GetSourcesAsObj()
+			for category := range categoryMap {
+				categoryListOrg, err := collector.GetCategorySlice(category)
+
+				categoryList := make([]collector.JsonFeedItem, len(categoryListOrg))
+				copy(categoryList, categoryListOrg)
+
+				if err != nil {
+					logger.Println(err)
+					w.WriteHeader(http.StatusBadRequest)
+					return
+				}
+
+				for _, item := range categoryList {
+					dbItem := convertToDBItem(item)
+					database.AddToHistory(dbItem)
+				}
+				for _, item := range categoryList {
+					collector.RemoveFromList(item.ID)
+				}
+			}
+
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+
+		categoryListOrg, err := collector.GetCategorySlice(category)
+
+		categoryList := make([]collector.JsonFeedItem, len(categoryListOrg))
+		copy(categoryList, categoryListOrg)
+
+		if err != nil {
+			logger.Println(err)
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+
+		for _, item := range categoryList {
+			dbItem := convertToDBItem(item)
+			database.AddToHistory(dbItem)
+		}
+		for _, item := range categoryList {
+			collector.RemoveFromList(item.ID)
+		}
+
+		w.WriteHeader(http.StatusOK)
+
+	})
+
+	mux.HandleFunc("/rss/{category}/{source}/readAll", func(w http.ResponseWriter, r *http.Request) {
+		source := r.PathValue("source")
+
+		sourceListOrg, err := collector.GetSourceSlice(source)
+
+		sourceList := make([]collector.JsonFeedItem, len(sourceListOrg))
+		copy(sourceList, sourceListOrg)
+
+		if err != nil {
+			logger.Println(err)
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+
+		for _, item := range sourceList {
+			dbItem := convertToDBItem(item)
+			database.AddToHistory(dbItem)
+		}
+		for _, item := range sourceList {
+			collector.RemoveFromList(item.ID)
+		}
+
+		w.WriteHeader(http.StatusOK)
+
 	})
 
 	clientServer := &http.Server{
@@ -202,4 +277,16 @@ func startServerRoutine(logger *log.Logger, stopRoutine chan bool, conf config.C
 			}
 		}
 	}
+}
+
+func convertToDBItem(item collector.JsonFeedItem) database.DatabaseFeedItem {
+	var dbItem database.DatabaseFeedItem
+	dbItem.ID = item.ID
+	dbItem.Title = item.Title
+	dbItem.Link = item.Link
+	dbItem.Source = item.Source
+	dbItem.Category = item.Category
+	dbItem.PubDate = item.PubDate
+
+	return dbItem
 }

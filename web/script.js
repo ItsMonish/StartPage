@@ -8,6 +8,10 @@ window.onload = function() {
   document.getElementById("read-filter").addEventListener("change", function(ev) {
     activateFilter();
   })
+  document.getElementById("list-read").addEventListener("click", function(ev) {
+    markListRead();
+  })
+  document.getElementById("read-filter").selectedIndex = 0;
   renderSources();
   renderRSS();
 }
@@ -16,6 +20,37 @@ function searchDDG() {
   let query = document.getElementById("search-query").value;
   window.location.href = "https://duckduckgo.com/?q=" + query;
   document.getElementById("search-query").value = "";
+}
+
+function markListRead() {
+  let filter = document.getElementById("category-filter").value;
+  let readFilter = document.getElementById("read-filter").value;
+
+  if (readFilter != "unread") return;
+
+  fetch("/rss/" + filter + "/readAll")
+    .then(response => {
+      if (!response.ok) {
+        throw new Error("Error collection RSS feed with filter " + val);
+      } else {
+        let feedList = document.getElementById("feed-list");
+        let notificationBubble = document.getElementById("rss-bubble");
+        notificationBubble.innerText = notificationBubble.innerText - feedList.children.length;
+        feedList.innerHTML = "";
+        let nothinghere = document.createElement("h2")
+        nothinghere.style = "margin-top: 3%; margin-left: 1%";
+        if (readFilter == "unread")
+          nothinghere.innerText = "It seems you have read it all...";
+        else if (readFilter == "favourite")
+          nothinghere.innerText = "It seems you haven't favourited anything...";
+        else
+          nothinghere.innerText = "It seems there is nothing here...";
+        feedList.appendChild(nothinghere);
+      }
+    })
+    .catch(error => {
+      console.log(error)
+    });
 }
 
 function activateFilter() {
@@ -50,6 +85,22 @@ function activateFilter() {
 function renderJsonInList(jsonRssFeed) {
   let feedList = document.getElementById("feed-list");
   feedList.innerHTML = "";
+
+  if (jsonRssFeed == null || jsonRssFeed.length == 0) {
+    let readFilter = document.getElementById("read-filter").value;
+    let nothinghere = document.createElement("h2")
+    nothinghere.style = "margin-top: 3%; margin-left: 1%";
+    if (readFilter == "unread")
+      nothinghere.innerText = "It seems you have read it all...";
+    else if (readFilter == "favourite")
+      nothinghere.innerText = "It seems you haven't favourited anything...";
+    else
+      nothinghere.innerText = "It seems there is nothing here...";
+    feedList.appendChild(nothinghere);
+    if (readFilter == "unread") document.getElementById("rss-bubble").innerText = 0;
+    return;
+  }
+
   for (let idx = 0; idx < jsonRssFeed.length; idx++) {
     let curObj = jsonRssFeed[idx];
     let newNode = document.createElement("div");

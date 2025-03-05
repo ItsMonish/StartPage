@@ -200,6 +200,25 @@ select {
   margin: 10px;
 }
 
+select:hover {
+  background-color: #444;
+  cursor: pointer;
+}
+
+.list-read-btn {
+  background-color: #333;
+  color: #fff;
+  border: 1px solid #444;
+  padding: 8px;
+  border-radius: 5px;
+  margin: 10px;
+}
+
+.list-read-btn:hover {
+  background-color: #444;
+  cursor: pointer;
+}
+
 #feed-list {
   overflow: hidden scroll;
   height: 88vh;

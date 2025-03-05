@@ -24,7 +24,7 @@
         <div class="card rss-card" onclick="changePage('rss')">
             <div class="rss-icon">
                 <img width="24" height="24" src="/assets/rss-ico.png" />
-                <span id="rss-bubble" class="notification-bubble">5</span>
+                <span id="rss-bubble" class="notification-bubble"></span>
             </div>
         </div>
         <div class="card yt-card" onclick="changePage('youtube')">
@@ -101,6 +101,10 @@
             <option value="read">Read</option>
             <option value="favourites">Favourites</option>
         </select>
+
+        <button id="list-read" title="Mark current filter as Read" class="list-read-btn">
+            Mark list as Read
+        </button>
 
         <div id="feed-list">
         </div>

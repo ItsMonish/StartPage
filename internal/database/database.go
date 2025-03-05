@@ -34,6 +34,10 @@ type DatabaseFeedReadItem struct {
 }
 
 func AddToHistory(rssItem DatabaseFeedItem) error {
+	if rssItem.ID == 0 {
+		return nil
+	}
+
 	db, err := getDatabaseInstance()
 
 	if err != nil {

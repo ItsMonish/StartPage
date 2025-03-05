@@ -42,7 +42,7 @@ var (
 	sources         map[string][]string
 	sourcesAsString string
 	sourceFeed      map[string][]JsonFeedItem
-	CurrentId       int = 0
+	CurrentId       int = 1
 )
 
 func RefreshRssFeed(logger *log.Logger, rssList map[string][]config.TitleURLItem) {
@@ -60,6 +60,7 @@ func RefreshRssFeed(logger *log.Logger, rssList map[string][]config.TitleURLItem
 		for _, item := range items {
 
 			sources[category] = append(sources[category], item.Title)
+			sourceFeed[item.Title] = make([]JsonFeedItem, 0)
 
 			resp, err := http.Get(item.Url)
 
@@ -136,22 +137,22 @@ func RefreshRssFeed(logger *log.Logger, rssList map[string][]config.TitleURLItem
 
 	sourcesAsString = string(sourcesCont)
 
-	//for cat, srcs := range sources {
-	//	logger.Println("category", cat)
-	//	for _, src := range srcs {
-	//		logger.Println("\t", src)
-	//		for _, item := range sourceFeed[src] {
-	//			logger.Println("\t\t", item.Link)
-	//		}
-	//	}
-	//}
-
-	//for cat, items := range sourceFeed {
-	//	logger.Println("category", cat)
-	//	for _, item := range items {
-	//		logger.Println("item", item)
-	//	}
-	//}
+	// for cat, srcs := range sources {
+	// 	logger.Println("category", cat)
+	// 	for _, src := range srcs {
+	// 		logger.Println("\t", src)
+	// 		for _, item := range sourceFeed[src] {
+	// 			logger.Println("\t\t", item.Link)
+	// 		}
+	// 	}
+	// }
+	//
+	// for cat, items := range sourceFeed {
+	// 	logger.Println("source", cat)
+	// 	for _, item := range items {
+	// 		logger.Println("item", item)
+	// 	}
+	// }
 }
 
 func GetSourcesAsObj() map[string][]string {
@@ -163,6 +164,9 @@ func GetSourcesAsStr() string {
 }
 
 func CollectRssAsJson() string {
+	if len(rssJsonItems) == 0 || rssJsonItems == nil {
+		return "[]"
+	}
 	return rssJsonString
 }
 
@@ -177,6 +181,10 @@ func GetSourceFeed(source string) (string, error) {
 		return "", errors.New("not found")
 	}
 
+	if len(jsonFeed) == 0 || jsonFeed == nil {
+		return "[]", nil
+	}
+
 	jsonCont, _ := json.Marshal(jsonFeed)
 
 	return string(jsonCont), nil
@@ -184,18 +192,14 @@ func GetSourceFeed(source string) (string, error) {
 }
 
 func GetCategoryFeed(category string) (string, error) {
-	sources, ok := sources[category]
+	categoryFeed, err := GetCategorySlice(category)
 
-	if !ok {
-		return "", errors.New("not found")
+	if err != nil {
+		return "", err
 	}
 
-	var categoryFeed []JsonFeedItem
-
-	for _, source := range sources {
-		for _, item := range sourceFeed[source] {
-			categoryFeed = append(categoryFeed, item)
-		}
+	if len(categoryFeed) == 0 || categoryFeed == nil {
+		return "[]", nil
 	}
 
 	sort.SliceStable(categoryFeed, func(i, j int) bool {
@@ -235,9 +239,39 @@ func RemoveFromList(id int) error {
 			break
 		}
 	}
-	if idx <= 0 {
+	if idx < 0 {
 		return nil
 	}
 	sourceFeed[item.Source] = slices.Delete(sourceFeed[item.Source], idx, idx+1)
+	newContent, _ := json.Marshal(rssJsonItems)
+	rssJsonString = string(newContent)
 	return nil
+}
+
+func GetCategorySlice(category string) ([]JsonFeedItem, error) {
+	sources, ok := sources[category]
+
+	if !ok {
+		return nil, errors.New("Category not found")
+	}
+
+	var categoryFeed []JsonFeedItem
+
+	for _, source := range sources {
+		for _, item := range sourceFeed[source] {
+			categoryFeed = append(categoryFeed, item)
+		}
+	}
+
+	return categoryFeed, nil
+}
+
+func GetSourceSlice(source string) ([]JsonFeedItem, error) {
+	returnList, ok := sourceFeed[source]
+
+	if !ok {
+		return nil, errors.New("Source not found")
+	}
+
+	return returnList, nil
 }
