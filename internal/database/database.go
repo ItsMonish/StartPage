@@ -112,17 +112,17 @@ func GetReadItemsAsJson(category string, source string) (string, error) {
 
 	var rows *sql.Rows
 	if category == "" && source == "" {
-		rows, err = db.Query("SELECT * FROM RssHistory")
+		rows, err = db.Query("SELECT * FROM RssHistory ORDER BY sid DESC")
 		if err != nil {
 			return "{}", nil
 		}
 	} else if source == "" {
-		rows, err = db.Query("SELECT * FROM RssHistory WHERE category=?", category)
+		rows, err = db.Query("SELECT * FROM RssHistory WHERE category=? ORDER BY sid DESC", category)
 		if err != nil {
 			return "{}", nil
 		}
 	} else {
-		rows, err = db.Query("SELECT * FROM RssHistory WHERE category=? AND source=?", category, source)
+		rows, err = db.Query("SELECT * FROM RssHistory WHERE category=? AND source=? ORDER BY sid DESC", category, source)
 		if err != nil {
 			return "{}", nil
 		}
