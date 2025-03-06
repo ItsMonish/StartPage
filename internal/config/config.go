@@ -56,34 +56,5 @@ func GetConfig(logger *log.Logger, configPath string) Configuration {
 		syscall.Kill(syscall.Getpid(), syscall.SIGINT)
 	}
 
-	//logger.Println("Server port: ", config.Port)
-	//for category, feeds := range config.Rss {
-	//	logger.Println("Category:", category)
-	//	for _, feed := range feeds {
-	//		logger.Printf("  - %s: %s\n", feed.Title, feed.Url)
-	//	}
-	//}
-
-	//for _, channel := range config.Yt {
-	//	logger.Println(channel.Title, " - ", channel.Url)
-	//}
-
-	//logger.Println("List 1: ", config.Links.List1Name)
-	//for _, item := range config.Links.List1 {
-	//	logger.Println("Title: ", item.Title, " - ", item.Url)
-	//}
-	//logger.Println("List 2: ", config.Links.List2Name)
-	//for _, item := range config.Links.List2 {
-	//	logger.Println("Title: ", item.Title, " - ", item.Url)
-	//}
-	//logger.Println("List 3: ", config.Links.List3Name)
-	//for _, item := range config.Links.List3 {
-	//	logger.Println("Title: ", item.Title, " - ", item.Url)
-	//}
-	//logger.Println("List 4: ", config.Links.List4Name)
-	//for _, item := range config.Links.List4 {
-	//	logger.Println("Title: ", item.Title, " - ", item.Url)
-	//}
-
 	return config
 }

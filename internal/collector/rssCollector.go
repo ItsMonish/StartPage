@@ -15,27 +15,6 @@ import (
 	"github.com/ItsMonish/StartPage/internal/database"
 )
 
-type XmlRssItem struct {
-	Title   string `xml:"title"`
-	Link    string `xml:"link"`
-	PubDate string `xml:"pubDate"`
-}
-
-type XmlRssFeed struct {
-	Source   string
-	Category string
-	Feed     []XmlRssItem `xml:"channel>item"`
-}
-
-type JsonFeedItem struct {
-	ID       int       `json:"id"`
-	Title    string    `json:"title"`
-	Link     string    `json:"link"`
-	PubDate  time.Time `json:"pubDate"`
-	Source   string    `json:"source"`
-	Category string    `json:"category"`
-}
-
 var (
 	rssJsonItems    []JsonFeedItem
 	rssJsonString   string
@@ -137,22 +116,6 @@ func RefreshRssFeed(logger *log.Logger, rssList map[string][]config.TitleURLItem
 
 	sourcesAsString = string(sourcesCont)
 
-	// for cat, srcs := range sources {
-	// 	logger.Println("category", cat)
-	// 	for _, src := range srcs {
-	// 		logger.Println("\t", src)
-	// 		for _, item := range sourceFeed[src] {
-	// 			logger.Println("\t\t", item.Link)
-	// 		}
-	// 	}
-	// }
-	//
-	// for cat, items := range sourceFeed {
-	// 	logger.Println("source", cat)
-	// 	for _, item := range items {
-	// 		logger.Println("item", item)
-	// 	}
-	// }
 }
 
 func GetSourcesAsObj() map[string][]string {
