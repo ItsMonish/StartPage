@@ -24,13 +24,14 @@ type DatabaseFeedItem struct {
 }
 
 type DatabaseFeedReadItem struct {
-	ID       int    `json:"id"`
-	Title    string `json:"title"`
-	Link     string `json:"link"`
-	PubDate  string `json:"pubDate"`
-	ReadAt   string `json:"readAt"`
-	Source   string `json:"source"`
-	Category string `json:"category"`
+	ID          int    `json:"id"`
+	Title       string `json:"title"`
+	Link        string `json:"link"`
+	PubDate     string `json:"pubDate"`
+	ReadAt      string `json:"readAt"`
+	Source      string `json:"source"`
+	Category    string `json:"category"`
+	IsFavourite bool   `json:"isFavourite"`
 }
 
 func AddToHistory(rssItem DatabaseFeedItem) error {
@@ -137,6 +138,7 @@ func GetReadItemsAsJson(category string, source string) (string, error) {
 
 	for rows.Next() {
 		rows.Scan(&readItem.ID, &readItem.Link, &readItem.Title, &readItem.Source, &readItem.Category, &readItem.PubDate, &readItem.ReadAt)
+		readItem.IsFavourite, _ = isFavourite(readItem.Link)
 		returnList = append(returnList, readItem)
 	}
 
@@ -147,6 +149,75 @@ func GetReadItemsAsJson(category string, source string) (string, error) {
 	}
 
 	return string(jsonContent), nil
+}
+
+func AddToFavourites(link string) error {
+	db, err := getDatabaseInstance()
+
+	if err != nil {
+		return errors.New("Error getting database instance")
+	}
+
+	var item DatabaseFeedReadItem
+
+	row := db.QueryRow("SELECT * FROM RssHistory WHERE url=?", link)
+	err = row.Scan(&item.ID, &item.Link, &item.Title, &item.Source, &item.Category, &item.PubDate, &item.ReadAt)
+
+	if err != nil {
+		return errors.New("Error retrieving item from history table")
+	}
+
+	favouritedAt := time.Now().String()
+
+	_, err = db.Exec(`INSERT INTO RssFavourites VALUES(?,?,?,?,?,?)`,
+		item.Link,
+		item.Title,
+		item.Source,
+		item.Category,
+		item.PubDate,
+		favouritedAt,
+	)
+
+	if err != nil {
+		return errors.New("Error inserting into favourites table")
+	}
+
+	return nil
+}
+
+func RemoveFromFavourites(link string) error {
+	db, err := getDatabaseInstance()
+
+	if err != nil {
+		return errors.New("Error getting database instance")
+	}
+
+	_, err = db.Exec("DELETE FROM RssFavourites WHERE url=?", link)
+
+	if err != nil {
+		return errors.New("Error deleting from favourites table")
+	}
+
+	return nil
+}
+
+func isFavourite(link string) (bool, error) {
+	db, err := getDatabaseInstance()
+
+	if err != nil {
+		return false, errors.New("Error getting database instance")
+	}
+
+	row := db.QueryRow("SELECT url FROM RssFavourites WHERE url=?", link)
+
+	var u string
+	err = row.Scan(&u)
+
+	if err == nil {
+		return true, nil
+	}
+
+	return false, nil
 }
 
 func getDatabaseInstance() (*sql.DB, error) {
@@ -180,13 +251,13 @@ func getDatabaseInstance() (*sql.DB, error) {
     `)
 
 	_, err = dbInstance.Exec(`
-        CREATE TABLE IF NOT EXISTS RssFavorites(
+        CREATE TABLE IF NOT EXISTS RssFavourites(
             url TEXT PRIMARY KEY,
             title TEXT,
             source TEXT,
             category TEXT,
             pubDate TEXT,
-            readAt TEXT
+            favouritedAt TEXT
         );
     `)
 

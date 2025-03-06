@@ -16,7 +16,7 @@ var (
 )
 
 func main() {
-	logger := log.New(os.Stdout, "", log.LUTC|log.LstdFlags)
+	logger := log.New(os.Stdout, "", log.LUTC|log.LstdFlags|log.Lshortfile)
 
 	flag.StringVar(&configPath, "config", "", "Path to config file")
 	flag.IntVar(&port, "port", 8080, "Port to open server on")
