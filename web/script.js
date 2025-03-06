@@ -132,12 +132,6 @@ function renderJsonInList(jsonRssFeed) {
         favourite.innerHTML = `&#x2605`;
       }
       newNode.appendChild(favourite);
-      markIcon.innerHTML = `&#x2717`;
-      markIcon.title = "Mark as Unread";
-      markIcon.style = "right: 120px;"
-      markIcon.classList.add("right-button");
-      markIcon.setAttribute("onclick", "event.stopPropagation();console.log('do it')");
-      newNode.appendChild(markIcon);
     } else {
       markIcon.innerHTML = `&#x1F441`;
       markIcon.setAttribute("onclick", `event.stopPropagation();markAsRead(this, ${curObj.id}, true);`);
