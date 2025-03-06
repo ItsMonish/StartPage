@@ -62,8 +62,7 @@ function activateFilter() {
   } else if (val == "read") {
     reqUrl = "/rss/" + filter + "/viewed";
   } else if (val == "favourites") {
-    //reqUrl = "/rss/" + filter + "/favourites";
-    console.log("yet to implement"); return;
+    reqUrl = "/rss/" + filter + "/favourites";
   } else {
     console.error("Invalid read filter passed");
   }
@@ -132,6 +131,17 @@ function renderJsonInList(jsonRssFeed) {
         favourite.innerHTML = `&#x2605`;
       }
       newNode.appendChild(favourite);
+    } else if ("favouritedAt" in curObj) {
+      let favedAt = document.createElement("p");
+      favedAt.innerHTML = "<strong>Marked as Favourite at:</strong> " + prettyDate(curObj.favouritedAt);
+      newNode.appendChild(favedAt);
+      newNode.setAttribute("onclick", `window.open("${curObj.link}", '_blank').focus();`);
+      let favourite = document.createElement("button");
+      favourite.classList.add("right-button");
+      favourite.title = "Unmark as Favourite";
+      favourite.setAttribute("onclick", `event.stopPropagation();unmarkAsFavourite(this, "${curObj.link}")`);
+      favourite.innerHTML = `&#x2605`;
+      newNode.appendChild(favourite);
     } else {
       markIcon.innerHTML = `&#x1F441`;
       markIcon.setAttribute("onclick", `event.stopPropagation();markAsRead(this, ${curObj.id}, true);`);
@@ -171,9 +181,14 @@ function unmarkAsFavourite(caller, link) {
       if (!response.ok) {
         throw new Error("Error unmarking item as favourite");
       }
-      caller.innerHTML = `&#x2606`;
-      caller.title = "Mark as Favourite";
-      caller.setAttribute("onclick", `event.stopPropagation(); markAsFavourite(this, "${link}");`)
+      let readFilter = document.getElementById("read-filter").value;
+      if (readFilter == "favourites") {
+        caller.parentElement.remove();
+      } else {
+        caller.innerHTML = `&#x2606`;
+        caller.title = "Mark as Favourite";
+        caller.setAttribute("onclick", `event.stopPropagation(); markAsFavourite(this, "${link}");`)
+      }
     })
     .catch(error => {
       console.log(error)

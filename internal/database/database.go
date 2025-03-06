@@ -34,6 +34,15 @@ type DatabaseFeedReadItem struct {
 	IsFavourite bool   `json:"isFavourite"`
 }
 
+type FavouriteRSSItem struct {
+	Title        string `json:"title"`
+	Link         string `json:"link"`
+	PubDate      string `json:"pubDate"`
+	FavouritedAt string `json:"favouritedAt"`
+	Source       string `json:"source"`
+	Category     string `json:"category"`
+}
+
 func AddToHistory(rssItem DatabaseFeedItem) error {
 	if rssItem.ID == 0 {
 		return nil
@@ -199,6 +208,43 @@ func RemoveFromFavourites(link string) error {
 	}
 
 	return nil
+}
+
+func GetFavourties(category string, source string) (string, error) {
+	db, err := getDatabaseInstance()
+
+	if err != nil {
+		return "", errors.New("Error getting database instance")
+	}
+
+	var rows *sql.Rows
+
+	if category == "all" && source == "" {
+		rows, err = db.Query("SELECT * FROM RssFavourites")
+	} else if source == "" {
+		rows, err = db.Query("SELECT * FROM RssFavourites WHERE category=?", category)
+	} else {
+		rows, err = db.Query("SELECT * FROM RssFavourites WHERE category=? AND source=?", category, source)
+	}
+
+	if err != nil {
+		return "", errors.New("Error getting from favourites table")
+	}
+
+	var itemList []FavouriteRSSItem
+	var item FavouriteRSSItem
+
+	for rows.Next() {
+		err = rows.Scan(&item.Link, &item.Title, &item.Source, &item.Category, &item.PubDate, &item.FavouritedAt)
+		itemList = append(itemList, item)
+	}
+
+	jsonContent, err := json.Marshal(itemList)
+	if err != nil {
+		return "", errors.New("Error marshalling favourites RSS")
+	}
+
+	return string(jsonContent), nil
 }
 
 func isFavourite(link string) (bool, error) {
