@@ -108,21 +108,18 @@
     </div>
 
     <div id="youtube-page" class="page">
-        <h1>YouTube Page</h1>
-        <p>This is the YouTube page. Explore videos here.</p>
+        <h1>YouTube Feed</h1>
+        <div class="filters">
+            <select id="channel-filter">
+            </select>
+
+            <select id="yt-seen-filter">
+                <option value="new">New</option>
+                <option value="watched">Watched</option>
+                <option value="favourites">Favourites</option>
+            </select>
+        </div>
     </div>
-
-    <script>
-        function changePage(page) {
-            const pages = document.querySelectorAll('.page');
-            pages.forEach(p => {
-                p.classList.remove('active-page');
-            });
-
-            const selectedPage = document.getElementById(`${page}-page`);
-            selectedPage.classList.add('active-page');
-        }
-    </script>
 
     <script src="/assets/script.js"></script>
 

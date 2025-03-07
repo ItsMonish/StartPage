@@ -12,6 +12,7 @@ window.onload = function() {
     markListRead();
   })
   document.getElementById("read-filter").selectedIndex = 0;
+  document.getElementById("yt-seen-filter").selectedIndex = 0;
   renderSources();
   renderRSS();
 }
