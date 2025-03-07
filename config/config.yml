@@ -46,8 +46,12 @@ rss:
 
 # Youtube feed go here
 # No category feature here as of now. Just fill in Channel name and XML list
-# XML URL is ://www.youtube.com/feeds/videos.xml?channel_id=<channel id> 
+# XML URL is https://www.youtube.com/feeds/videos.xml?channel_id=<channel id> 
 # where channel ID of the respective channel needs to filled in place of <channel id>
 youtube:
-  - title: Sample
-    url: https://example.com/
+  - title: Low Level TV
+    url: https://www.youtube.com/feeds/videos.xml?channel_id=UC6biysICWOJ-C3P4Tyeggzg
+  - title: John Hammond
+    url: https://www.youtube.com/feeds/videos.xml?channel_id=UCVeW9qkBjo3zosnqUbG7CFw
+  - title: Live Overflow
+    url: https://www.youtube.com/feeds/videos.xml?channel_id=UClcE-kVhqyiHCcjYwcpfj9w
