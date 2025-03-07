@@ -3,18 +3,21 @@ window.onload = function() {
     if (ev.key == "Enter") searchDDG();
   });
   document.getElementById("category-filter").addEventListener("change", function(ev) {
-    activateFilter();
+    activateRssFilter();
   });
   document.getElementById("read-filter").addEventListener("change", function(ev) {
-    activateFilter();
+    activateRssFilter();
   })
   document.getElementById("list-read").addEventListener("click", function(ev) {
     markListRead();
   })
+  renderRssSources();
+  renderYtSources();
+  renderRSS();
+  renderYt();
   document.getElementById("read-filter").selectedIndex = 0;
   document.getElementById("yt-seen-filter").selectedIndex = 0;
-  renderSources();
-  renderRSS();
+  document.getElementById("channel-filter").selectedIndex = 0;
 }
 
 function searchDDG() {
@@ -54,7 +57,7 @@ function markListRead() {
     });
 }
 
-function activateFilter() {
+function activateRssFilter() {
   let filter = document.getElementById("category-filter").value;
   let val = document.getElementById("read-filter").value;
   let reqUrl = "";
@@ -75,14 +78,14 @@ function activateFilter() {
       return response.json();
     })
     .then(jsonRssFeed => {
-      renderJsonInList(jsonRssFeed)
+      renderRssJson(jsonRssFeed)
     })
     .catch(error => {
       console.log(error)
     });
 }
 
-function renderJsonInList(jsonRssFeed) {
+function renderRssJson(jsonRssFeed) {
   let feedList = document.getElementById("feed-list");
   feedList.innerHTML = "";
 
@@ -149,9 +152,74 @@ function renderJsonInList(jsonRssFeed) {
       markIcon.setAttribute("title", "Mark as Read");
       markIcon.classList.add("right-button")
       newNode.appendChild(markIcon);
-      newNode.setAttribute("onclick", `newTab(this,"${curObj.id}" ,"${curObj.link}");`);
+      newNode.setAttribute("onclick", `newTab(this,"${curObj.id}" ,"${curObj.link}", "rss");`);
     }
     feedList.appendChild(newNode);
+  }
+}
+
+
+function renderYtJson(ytJsonList) {
+  let videoList = document.getElementById("video-list");
+  videoList.innerHTML = "";
+
+  if (ytJsonList == null || ytJsonList.length == 0) {
+    let readFilter = document.getElementById("yt-seen-filter").value;
+    let nothinghere = document.createElement("h2")
+    nothinghere.style = "margin-top: 3%; margin-left: 1%";
+    if (readFilter == "new")
+      nothinghere.innerText = "It seems you have watched it all...";
+    else if (readFilter == "favourites")
+      nothinghere.innerText = "It seems you haven't favourited anything...";
+    else
+      nothinghere.innerText = "It seems there is nothing here...";
+    videoList.appendChild(nothinghere);
+    if (readFilter == "new") document.getElementById("yt-bubble").innerText = 0;
+    return;
+  }
+
+  for (let item of ytJsonList) {
+    console.log("hit")
+    let videoDiv = document.createElement("div");
+    videoDiv.classList.add("video-item");
+    let thumbnailDiv = document.createElement("div");
+    thumbnailDiv.classList.add("video-thumbnail");
+    let thumbnailImg = document.createElement("img");
+    thumbnailImg.setAttribute("src", `${item.thumbnail}`);
+    thumbnailImg.setAttribute("alt", "Video Thumbnail");
+    thumbnailDiv.appendChild(thumbnailImg);
+    videoDiv.appendChild(thumbnailDiv);
+    let infoDiv = document.createElement("div");
+    infoDiv.classList.add("video-info");
+    let title = document.createElement("h3");
+    title.innerText = `${item.title}`
+    let chName = document.createElement("p");
+    chName.innerHTML = "<strong>Channel: </strong>" + `${item.channel}`;
+    infoDiv.appendChild(title);
+    infoDiv.appendChild(chName);
+    let videoActionDiv = document.createElement("div");
+    videoActionDiv.classList.add("video-actions");
+    let favButton = document.createElement("button");
+    favButton.classList.add("favorite-btn");
+    if ("watchedAt" in item) {
+      // todo: history stuff
+    } else if ("favouritedAt" in item) {
+      // todo: favourite stuff
+    } else {
+      let pubDate = document.createElement("p");
+      pubDate.innerHTML = "<strong>Published At: </strong>" + prettyDate(item.pubDate);
+      infoDiv.appendChild(pubDate);
+      let markSeenBtn = document.createElement("button");
+      markSeenBtn.classList.add("mark-seen-btn");
+      markSeenBtn.innerHTML = `&#x1F441`;
+      markSeenBtn.onclick = `event.stopPropagation(); console.log(this, "${item.link}", "${item.id}");`;
+      videoActionDiv.appendChild(markSeenBtn)
+    }
+    videoDiv.appendChild(infoDiv);
+    videoDiv.appendChild(videoActionDiv);
+    videoDiv.title = item.title;
+    videoDiv.setAttribute("onclick", `newTab(this,"${item.id}" ,"${item.link}", "yt");`);
+    videoList.appendChild(videoDiv);
   }
 }
 
@@ -206,14 +274,61 @@ function renderRSS() {
     })
     .then(jsonRssFeed => {
       document.getElementById("rss-bubble").innerText = jsonRssFeed.length;
-      renderJsonInList(jsonRssFeed)
+      renderRssJson(jsonRssFeed)
     })
     .catch(error => {
       console.log(error)
     });
 }
 
-function renderSources() {
+function renderYt() {
+  let chFilter = document.getElementById("channel-filter").value;
+  if (chFilter == "") chFilter = "all";
+  fetch("/yt/" + chFilter)
+    .then(response => {
+      if (!response.ok) {
+        throw new Error("Error collection YT feed response");
+      }
+      return response.json();
+    })
+    .then(jsonYtFeed => {
+      document.getElementById("youtube-bubble").innerText = jsonYtFeed.length;
+      renderYtJson(jsonYtFeed)
+    })
+    .catch(error => {
+      console.log(error)
+    });
+}
+
+function renderYtSources() {
+  fetch("/yt/srcs")
+    .then(response => {
+      if (!response.ok) {
+        throw new Error("Error collection RSS feed response");
+      }
+      return response.json();
+    })
+    .then(jsonSources => {
+      let catFilter = document.getElementById("channel-filter");
+      catFilter.innerHTML = "";
+      let allOption = document.createElement("option");
+      allOption.setAttribute("value", "all");
+      allOption.innerText = "All Channels";
+      catFilter.appendChild(allOption);
+
+      for (let source of jsonSources) {
+        let sourceNode = document.createElement("option");
+        sourceNode.setAttribute("value", `${source}`);
+        sourceNode.innerText = titleCase(source);
+        catFilter.appendChild(sourceNode);
+      }
+    })
+    .catch(error => {
+      console.log(error);
+    });
+}
+
+function renderRssSources() {
   fetch("/rss/srcs")
     .then(response => {
       if (!response.ok) {
@@ -278,8 +393,9 @@ function changePage(page) {
   selectedPage.classList.add('active-page');
 }
 
-function newTab(caller, id, url) {
-  markAsRead(caller, id, false);
+function newTab(caller, id, url, feed) {
+  if (feed == "rss") markAsRead(caller, id, false);
+  //else markAsSeen(caller, id, false);
   window.open(url, '_blank').focus();
 }
 

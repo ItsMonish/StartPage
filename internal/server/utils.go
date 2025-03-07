@@ -17,7 +17,9 @@ func startServerRoutine(logger *log.Logger, stopRoutine chan bool, conf config.C
 	nextRefresh := updateWithInterval(conf.Props.RefreshInterval)
 
 	collector.RefreshRssFeed(logger, conf.Rss)
-	logger.Println("Collecting from RSS sources")
+	logger.Println("Collected from RSS sources")
+	collector.RefreshYtFeed(logger, conf.Yt)
+	logger.Println("Collected from YT sources")
 
 	for {
 		select {
@@ -26,9 +28,10 @@ func startServerRoutine(logger *log.Logger, stopRoutine chan bool, conf config.C
 			return
 		default:
 			if time.Now().After(nextRefresh) {
-				logger.Println("Collecting from RSS sources")
 				collector.RefreshRssFeed(logger, conf.Rss)
-
+				logger.Println("Colleced from RSS sources")
+				collector.RefreshYtFeed(logger, conf.Yt)
+				logger.Println("Collected from YT sources")
 				nextRefresh = updateWithInterval(conf.Props.RefreshInterval)
 			} else {
 				time.Sleep(time.Minute)

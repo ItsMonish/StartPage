@@ -285,6 +285,28 @@ func StartServer(logger *log.Logger, conf config.Configuration) {
 		io.WriteString(w, returnList)
 	})
 
+	mux.HandleFunc("/yt/srcs", func(w http.ResponseWriter, r *http.Request) {
+		channelList, err := collector.GetYtChannelList()
+
+		if err != nil {
+			logger.Println(err)
+		}
+
+		w.Header().Add("Content-Type", "application/json")
+		io.WriteString(w, channelList)
+	})
+
+	mux.HandleFunc("/yt/{channel}", func(w http.ResponseWriter, r *http.Request) {
+		channel := r.PathValue("channel")
+
+		if channel == "all" || channel == "" {
+			w.Header().Add("Content-Type", "application/json")
+			io.WriteString(w, collector.GetFullYtFeed())
+		} else {
+			return
+		}
+	})
+
 	clientServer := &http.Server{
 		Addr:    ":" + strconv.Itoa(conf.Props.Port),
 		Handler: mux,
