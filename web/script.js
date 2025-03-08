@@ -11,6 +11,9 @@ window.onload = function() {
   document.getElementById("list-read").addEventListener("click", function(ev) {
     markListRead();
   })
+  document.getElementById("channel-filter").addEventListener("change", function(ev) {
+    renderYt();
+  })
   renderRssSources();
   renderYtSources();
   renderRSS();
@@ -179,7 +182,6 @@ function renderYtJson(ytJsonList) {
   }
 
   for (let item of ytJsonList) {
-    console.log("hit")
     let videoDiv = document.createElement("div");
     videoDiv.classList.add("video-item");
     let thumbnailDiv = document.createElement("div");

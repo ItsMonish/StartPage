@@ -99,6 +99,22 @@ func GetYtChannelList() (string, error) {
 	return string(content), nil
 }
 
+func GetChannelFeed(channel string) (string, error) {
+	feed, ok := channelFeed[channel]
+
+	if !ok {
+		return "", errors.New("Channel not found:" + channel)
+	}
+
+	jsonContent, err := json.Marshal(feed)
+
+	if err != nil {
+		return "", errors.New("Error marshalling channel feed into JSON")
+	}
+
+	return string(jsonContent), nil
+}
+
 func convertXMLtoJSONObject(feed []XmlYtItem, channel string, id *int) ([]JsonYtItem, error) {
 	returnList := make([]JsonYtItem, 0)
 

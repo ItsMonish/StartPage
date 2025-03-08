@@ -303,7 +303,14 @@ func StartServer(logger *log.Logger, conf config.Configuration) {
 			w.Header().Add("Content-Type", "application/json")
 			io.WriteString(w, collector.GetFullYtFeed())
 		} else {
-			return
+			w.Header().Add("Content-Type", "application/json")
+			content, err := collector.GetChannelFeed(channel)
+
+			if err != nil {
+				w.WriteHeader(http.StatusBadRequest)
+				return
+			}
+			io.WriteString(w, content)
 		}
 	})
 
