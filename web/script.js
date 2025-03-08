@@ -45,8 +45,7 @@ function markListRead() {
         notificationBubble.innerText = notificationBubble.innerText - feedList.children.length;
         feedList.innerHTML = "";
         let nothinghere = document.createElement("h2")
-        nothinghere.style = "margin-top: 3%; margin-left: 1%";
-        if (readFilter == "unread")
+        nothinghere.style = "margin-top: 3%; margin-left: 1%"; if (readFilter == "unread")
           nothinghere.innerText = "It seems you have read it all...";
         else if (readFilter == "favourite")
           nothinghere.innerText = "It seems you haven't favourited anything...";
@@ -214,7 +213,7 @@ function renderYtJson(ytJsonList) {
       let markSeenBtn = document.createElement("button");
       markSeenBtn.classList.add("mark-seen-btn");
       markSeenBtn.innerHTML = `&#x1F441`;
-      markSeenBtn.onclick = `event.stopPropagation(); console.log(this, "${item.link}", "${item.id}");`;
+      markSeenBtn.setAttribute("onclick", `event.stopPropagation(); markAsSeen(this, ${item.id}, true);`);
       videoActionDiv.appendChild(markSeenBtn)
     }
     videoDiv.appendChild(infoDiv);
@@ -385,6 +384,25 @@ function markAsRead(caller, id, btn) {
     })
 }
 
+function markAsSeen(caller, id, btn) {
+  fetch(`/yt/${id}/seen`)
+    .then(response => {
+      if (!response.ok) {
+        throw new Error("Error updating history");
+      }
+      if (!btn) {
+        caller.remove();
+      } else {
+        caller.parentElement.parentElement.remove();
+      }
+      document.getElementById("youtube-bubble").innerText = document.getElementById("youtube-bubble").innerText - 1;
+      return
+    })
+    .catch(err => {
+      console.log(err)
+    })
+}
+
 function changePage(page) {
   const pages = document.querySelectorAll('.page');
   pages.forEach(p => {
@@ -397,7 +415,7 @@ function changePage(page) {
 
 function newTab(caller, id, url, feed) {
   if (feed == "rss") markAsRead(caller, id, false);
-  //else markAsSeen(caller, id, false);
+  else markAsSeen(caller, id, false);
   window.open(url, '_blank').focus();
 }
 

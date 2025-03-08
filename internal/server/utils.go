@@ -12,7 +12,6 @@ import (
 func updateWithInterval(interval int) time.Time {
 	return time.Now().Add(time.Duration(interval) * time.Minute)
 }
-
 func startServerRoutine(logger *log.Logger, stopRoutine chan bool, conf config.Configuration) {
 	nextRefresh := updateWithInterval(conf.Props.RefreshInterval)
 
@@ -48,6 +47,18 @@ func convertToDBItem(item collector.JsonFeedItem) database.DatabaseFeedItem {
 	dbItem.Source = item.Source
 	dbItem.Category = item.Category
 	dbItem.PubDate = item.PubDate
+
+	return dbItem
+}
+
+func convertYTtoDBItem(item collector.JsonYtItem) database.DatabaseYTItem {
+	var dbItem database.DatabaseYTItem
+	dbItem.ID = item.ID
+	dbItem.Title = item.Title
+	dbItem.Link = item.Link
+	dbItem.Channel = item.Channel
+	dbItem.PubDate = item.PubDate
+	dbItem.ThumbNail = item.ThumbNail
 
 	return dbItem
 }

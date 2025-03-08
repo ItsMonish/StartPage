@@ -314,6 +314,29 @@ func StartServer(logger *log.Logger, conf config.Configuration) {
 		}
 	})
 
+	mux.HandleFunc("/yt/{id}/seen", func(w http.ResponseWriter, r *http.Request) {
+		id, _ := strconv.Atoi(r.PathValue("id"))
+
+		item, err := collector.GetYTItem(id)
+		if err != nil {
+			logger.Println(err)
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+
+		dbItem := convertYTtoDBItem(item)
+
+		err = database.AddYtItemToHistory(dbItem)
+		if err != nil {
+			logger.Println("Error adding item to history")
+		}
+
+		err = collector.DeleteYTItem(id)
+		if err != nil {
+			logger.Println("Error removing item from memory")
+		}
+	})
+
 	clientServer := &http.Server{
 		Addr:    ":" + strconv.Itoa(conf.Props.Port),
 		Handler: mux,

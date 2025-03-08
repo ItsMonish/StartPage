@@ -53,6 +53,29 @@ func getDatabaseInstance() (*sql.DB, error) {
         );
     `)
 
+	_, err = dbInstance.Exec(`
+        CREATE TABLE IF NOT EXISTS YtHistory(
+			sid INTEGER,
+            url TEXT PRIMARY KEY,
+			thumbnail TEXT,
+            title TEXT,
+            channel TEXT,
+            pubDate TEXT,
+            seenAt TEXT
+        );
+    `)
+
+	_, err = dbInstance.Exec(`
+        CREATE TABLE IF NOT EXISTS YtFavourites(
+            url TEXT PRIMARY KEY,
+			thumbnail TEXT,
+            title TEXT,
+            channel TEXT,
+            pubDate TEXT,
+            favouritedAt TEXT
+        );
+    `)
+
 	return dbInstance, nil
 }
 

@@ -7,6 +7,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"slices"
 	"sort"
 	"time"
 
@@ -137,4 +138,55 @@ func convertXMLtoJSONObject(feed []XmlYtItem, channel string, id *int) ([]JsonYt
 	}
 
 	return returnList, nil
+}
+
+func GetYTItem(id int) (JsonYtItem, error) {
+	for _, item := range totalFeed {
+		if item.ID == id {
+			return item, nil
+		}
+	}
+	return *(new(JsonYtItem)), errors.New("Error getting item with ID")
+}
+
+func DeleteYTItem(id int) error {
+	var idx int = -1
+
+	for i, item := range totalFeed {
+		if item.ID == id {
+			idx = i
+			break
+		}
+	}
+
+	if idx == -1 {
+		return errors.New("Error getting item with ID")
+	}
+
+	curItem := totalFeed[idx]
+
+	totalFeed = slices.Delete(totalFeed, idx, idx+1)
+
+	newContent, err := json.Marshal(totalFeed)
+	if err != nil {
+		return errors.New("Error Marshalling into JSON")
+	}
+	strFeed = string(newContent)
+
+	idx = -1
+
+	for i, item := range channelFeed[curItem.Channel] {
+		if item.ID == id {
+			idx = i
+			break
+		}
+	}
+
+	if idx == -1 {
+		return errors.New("Error getting item with ID")
+	}
+
+	channelFeed[curItem.Channel] = slices.Delete(channelFeed[curItem.Channel], idx, idx+1)
+
+	return nil
 }

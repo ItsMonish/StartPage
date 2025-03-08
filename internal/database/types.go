@@ -30,3 +30,32 @@ type FavouriteRSSItem struct {
 	Source       string `json:"source"`
 	Category     string `json:"category"`
 }
+
+type DatabaseYTItem struct {
+	ID        int
+	Title     string
+	Link      string
+	PubDate   time.Time
+	Channel   string
+	ThumbNail string
+}
+
+type DatabaseYTSeenItem struct {
+	ID          int    `json:"id"`
+	Title       string `json:"title"`
+	Link        string `json:"link"`
+	PubDate     string `json:"pubDate"`
+	Channel     string `json:"channel"`
+	ThumbNail   string `json:"thumbnail"`
+	SeenAt      string `json:"watchedAt"`
+	IsFavourite bool   `json:"isFavourite"`
+}
+
+type DatabaseYTFavourite struct {
+	Title        string `json:"title"`
+	Link         string `json:"link"`
+	PubDate      string `json:"pubDate"`
+	Channel      string `json:"channel"`
+	ThumbNail    string `json:"thumbnail"`
+	FavouritedAt string `json:"favouritedAt"`
+}
