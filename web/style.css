@@ -147,7 +147,6 @@ body {
 
 .page {
   display: none;
-  transition: opacity 0.5s ease-in-out;
   opacity: 0;
 }
 
@@ -384,12 +383,4 @@ select:hover {
 .mark-seen-btn:hover,
 .favorite-btn:hover {
   background-color: #666;
-}
-
-.favorite-btn {
-  background-color: #ffcc00;
-}
-
-.favorite-btn:hover {
-  background-color: #ffaa00;
 }

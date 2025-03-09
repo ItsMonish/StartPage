@@ -14,6 +14,9 @@ window.onload = function() {
   document.getElementById("channel-filter").addEventListener("change", function(ev) {
     renderYt();
   })
+  document.getElementById("yt-seen-filter").addEventListener("change", function(ev) {
+    activateYTSeenFilter();
+  })
   renderRssSources();
   renderYtSources();
   renderRSS();
@@ -81,6 +84,35 @@ function activateRssFilter() {
     })
     .then(jsonRssFeed => {
       renderRssJson(jsonRssFeed)
+    })
+    .catch(error => {
+      console.log(error)
+    });
+}
+
+function activateYTSeenFilter() {
+  let filter = document.getElementById("yt-seen-filter").value;
+  let channel = document.getElementById("channel-filter").value;
+  let reqUrl = "";
+  if (filter == "new") {
+    renderYt();
+    return;
+  } else if (filter == "watched") {
+    reqUrl = "/yt/" + channel + "/viewed";
+  } else if (filter == "favourites") {
+    reqUrl = "/yt/" + channel + "/favourites";
+  } else {
+    console.error("Invalid read filter passed");
+  }
+  fetch(reqUrl)
+    .then(response => {
+      if (!response.ok) {
+        throw new Error("Error collection Youtube feed with filter " + val);
+      }
+      return response.json();
+    })
+    .then(jsonFeed => {
+      renderYtJson(jsonFeed);
     })
     .catch(error => {
       console.log(error)
@@ -203,7 +235,22 @@ function renderYtJson(ytJsonList) {
     let favButton = document.createElement("button");
     favButton.classList.add("favorite-btn");
     if ("watchedAt" in item) {
-      // todo: history stuff
+      let pubDate = document.createElement("p");
+      pubDate.innerHTML = "<strong>Published At: </strong>" + prettyDate(item.pubDate);
+      let watchedAt = document.createElement("p");
+      watchedAt.innerHTML = "<strong>Watched At: </strong>" + prettyDate(item.watchedAt);
+      infoDiv.appendChild(pubDate);
+      infoDiv.appendChild(watchedAt);
+      if (!item.isFavourite) {
+        favButton.title = "Mark as Favourite";
+        favButton.setAttribute("onclick", `event.stopPropagation();console.log(this, "${item.link}")`);
+        favButton.innerHTML = `&#x2606`;
+      } else {
+        favButton.title = "Unmark as Favourite";
+        favButton.setAttribute("onclick", `event.stopPropagation();console.log(this, "${item.link}")`);
+        favButton.innerHTML = `&#x2605`;
+      }
+      videoActionDiv.appendChild(favButton)
     } else if ("favouritedAt" in item) {
       // todo: favourite stuff
     } else {

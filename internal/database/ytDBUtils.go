@@ -1,6 +1,8 @@
 package database
 
 import (
+	"database/sql"
+	"encoding/json"
 	"errors"
 	"time"
 )
@@ -53,4 +55,57 @@ func AddYtItemToHistory(item DatabaseYTItem) error {
 	}
 
 	return nil
+}
+
+func GetYTReadItemsAsJson(channel string) (string, error) {
+	db, err := getDatabaseInstance()
+	if err != nil {
+		return "", errors.New("Error getting database instance")
+	}
+
+	var rows *sql.Rows
+	if channel == "all" {
+		rows, err = db.Query("SELECT * FROM YtHistory")
+	} else {
+		rows, err = db.Query("SELECT * FROM YtHistory WHERE channel=?", channel)
+	}
+
+	if err != nil {
+		return "", errors.New("Error retrieving from history")
+	}
+
+	returnSlice := make([]DatabaseYTSeenItem, 0)
+	var seenItem DatabaseYTSeenItem
+
+	for rows.Next() {
+		rows.Scan(&seenItem.ID, &seenItem.Link, &seenItem.ThumbNail, &seenItem.Title, &seenItem.Channel, &seenItem.PubDate, &seenItem.SeenAt)
+		returnSlice = append(returnSlice, seenItem)
+		seenItem.IsFavourite, _ = isYTFavourite(seenItem.Link)
+	}
+
+	content, err := json.Marshal(returnSlice)
+	if err != nil {
+		return "", errors.New("Error marshalling into JSON")
+	}
+
+	return string(content), nil
+}
+
+func isYTFavourite(link string) (bool, error) {
+	db, err := getDatabaseInstance()
+
+	if err != nil {
+		return false, errors.New("Error getting database instance")
+	}
+
+	row := db.QueryRow("SELECT url FROM YtFavourites WHERE url=?", link)
+
+	var u string
+	err = row.Scan(&u)
+
+	if err == nil {
+		return true, nil
+	}
+
+	return false, nil
 }
