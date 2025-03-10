@@ -65,9 +65,9 @@ func GetYTReadItemsAsJson(channel string) (string, error) {
 
 	var rows *sql.Rows
 	if channel == "all" {
-		rows, err = db.Query("SELECT * FROM YtHistory")
+		rows, err = db.Query("SELECT * FROM YtHistory ORDER BY sid DESC")
 	} else {
-		rows, err = db.Query("SELECT * FROM YtHistory WHERE channel=?", channel)
+		rows, err = db.Query("SELECT * FROM YtHistory WHERE channel=? ORDER BY sid DESC", channel)
 	}
 
 	if err != nil {
