@@ -252,7 +252,16 @@ function renderYtJson(ytJsonList) {
       }
       videoActionDiv.appendChild(favButton)
     } else if ("favouritedAt" in item) {
-      // todo: favourite stuff
+      let pubDate = document.createElement("p");
+      pubDate.innerHTML = "<strong>Published At: </strong>" + prettyDate(item.pubDate);
+      let favedAt = document.createElement("p");
+      favedAt.innerHTML = "<strong>Favourited At: </strong>" + prettyDate(item.favouritedAt);
+      infoDiv.appendChild(pubDate);
+      infoDiv.appendChild(favedAt);
+      favButton.title = "Unmark as Favourite";
+      favButton.setAttribute("onclick", `event.stopPropagation();unmarkAsYtFavourite(this, "${item.link}")`);
+      favButton.innerHTML = `&#x2605`;
+      videoActionDiv.appendChild(favButton)
     } else {
       let pubDate = document.createElement("p");
       pubDate.innerHTML = "<strong>Published At: </strong>" + prettyDate(item.pubDate);
@@ -341,7 +350,7 @@ function unmarkAsYtFavourite(caller, link) {
       }
       let readFilter = document.getElementById("yt-seen-filter").value;
       if (readFilter == "favourites") {
-        caller.parentElement.remove();
+        caller.parentElement.parentElement.remove();
       } else {
         caller.innerHTML = `&#x2606`;
         caller.title = "Mark as Favourite";

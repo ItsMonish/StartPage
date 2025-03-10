@@ -390,6 +390,21 @@ func StartServer(logger *log.Logger, conf config.Configuration) {
 		w.WriteHeader(http.StatusOK)
 	})
 
+	mux.HandleFunc("/yt/{channel}/favourites", func(w http.ResponseWriter, r *http.Request) {
+		channel := r.PathValue("channel")
+
+		returnList, err := database.GetYtFavourites(channel)
+
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			logger.Println(err)
+			return
+		}
+
+		w.Header().Add("Content-Type", "application/json")
+		io.WriteString(w, returnList)
+	})
+
 	clientServer := &http.Server{
 		Addr:    ":" + strconv.Itoa(conf.Props.Port),
 		Handler: mux,

@@ -160,6 +160,41 @@ func RemoveFromYtFavourites(link string) error {
 	return nil
 }
 
+func GetYtFavourites(channel string) (string, error) {
+	db, err := getDatabaseInstance()
+
+	if err != nil {
+		return "", errors.New("Error getting database instance")
+	}
+
+	var rows *sql.Rows
+
+	if channel == "all" {
+		rows, err = db.Query("SELECT * FROM YtFavourites")
+	} else {
+		rows, err = db.Query("SELECT * FROM YtFavourites WHERE channel=?", channel)
+	}
+
+	if err != nil {
+		return "", errors.New("Error getting from favourites table")
+	}
+
+	var itemList []DatabaseYTFavourite
+	var item DatabaseYTFavourite
+
+	for rows.Next() {
+		err = rows.Scan(&item.Link, &item.ThumbNail, &item.Title, &item.Channel, &item.PubDate, &item.FavouritedAt)
+		itemList = append(itemList, item)
+	}
+
+	jsonContent, err := json.Marshal(itemList)
+	if err != nil {
+		return "", errors.New("Error marshalling favourites YT")
+	}
+
+	return string(jsonContent), nil
+}
+
 func isYTFavourite(link string) (bool, error) {
 	db, err := getDatabaseInstance()
 
