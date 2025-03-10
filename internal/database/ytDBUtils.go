@@ -17,7 +17,6 @@ func AddYtItemToHistory(item DatabaseYTItem) error {
 	row := db.QueryRow("SELECT MAX(sid) FROM YtHistory")
 
 	var maxSid int
-	var minSid int
 
 	err = row.Scan(&maxSid)
 
@@ -26,16 +25,19 @@ func AddYtItemToHistory(item DatabaseYTItem) error {
 	}
 
 	row = db.QueryRow("SELECT MIN(sid) FROM YtHistory")
-	err = row.Scan(&minSid)
-
-	if err != nil {
-		minSid = 0
-	}
-
 	maxSid += 1
 
-	if maxSid-500 >= minSid {
-		_, _ = db.Exec("DELETE FROM YtHistory WHERE sid < ?", (maxSid - 500))
+	var count int = 0
+	row = db.QueryRow("SELECT COUNT(*) FROM YtHistory WHERE channel=?", item.Channel)
+	_ = row.Scan(&count)
+
+	for count >= 50 {
+		_, _ = db.Exec(`DELETE FROM YtHistory 
+						WHERE 
+						sid=(SELECT MIN(sid) FROM YtHistory 
+							WHERE
+							channel=?)`, item.Channel)
+		count--
 	}
 
 	readAt := time.Now().String()
