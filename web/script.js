@@ -426,7 +426,7 @@ function renderYt() {
     })
     .then(jsonYtFeed => {
       renderYtJson(jsonYtFeed)
-      document.getElementById("youtube-bubble").innerText = ytJsonList.length;
+      document.getElementById("youtube-bubble").innerText = jsonYtFeed.length;
     })
     .catch(error => {
       console.log(error)
