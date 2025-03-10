@@ -18,7 +18,10 @@ var (
 func main() {
 	logger := log.New(os.Stdout, "", log.LUTC|log.LstdFlags|log.Lshortfile)
 
-	flag.StringVar(&configPath, "config", "", "Path to config file")
+	defaultConfig, _ := os.UserConfigDir()
+	defaultConfig += "/startpage/config.yml"
+
+	flag.StringVar(&configPath, "config", defaultConfig, "Path to config file")
 	flag.IntVar(&port, "port", 8080, "Port to open server on")
 	flag.Usage = func() {
 		fmt.Fprintf(flag.CommandLine.Output(), "Usage of %s:\n", os.Args[0])

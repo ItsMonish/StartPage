@@ -8,8 +8,6 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-const DB_FILE = "config/database.db"
-
 var dbInstance *sql.DB
 
 func getDatabaseInstance() (*sql.DB, error) {
@@ -18,7 +16,13 @@ func getDatabaseInstance() (*sql.DB, error) {
 		return dbInstance, nil
 	}
 
-	err := checkOrCreateDatabase()
+	DB_FILE, err := os.UserConfigDir()
+	if err != nil {
+		return nil, errors.New("User Config Folder not found")
+	}
+	DB_FILE = DB_FILE + "/startpage/database.db"
+
+	err = checkOrCreateDatabase(DB_FILE)
 
 	if err != nil {
 		return nil, errors.New("Error creating database")
@@ -79,7 +83,7 @@ func getDatabaseInstance() (*sql.DB, error) {
 	return dbInstance, nil
 }
 
-func checkOrCreateDatabase() error {
+func checkOrCreateDatabase(DB_FILE string) error {
 
 	_, err := os.Stat(DB_FILE)
 	if errors.Is(err, os.ErrNotExist) {
