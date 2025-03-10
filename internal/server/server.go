@@ -405,6 +405,31 @@ func StartServer(logger *log.Logger, conf config.Configuration) {
 		io.WriteString(w, returnList)
 	})
 
+	mux.HandleFunc("/yt/{channel}/markAll", func(w http.ResponseWriter, r *http.Request) {
+		channel := r.PathValue("channel")
+
+		sourceListOrg, err := collector.GetYTFilterSlice(channel)
+
+		sourceList := make([]collector.JsonYtItem, len(sourceListOrg))
+		copy(sourceList, sourceListOrg)
+
+		if err != nil {
+			logger.Println(err)
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+
+		for _, item := range sourceList {
+			dbItem := convertYTtoDBItem(item)
+			database.AddYtItemToHistory(dbItem)
+		}
+		for _, item := range sourceList {
+			collector.DeleteYTItem(item.ID)
+		}
+
+		w.WriteHeader(http.StatusOK)
+	})
+
 	clientServer := &http.Server{
 		Addr:    ":" + strconv.Itoa(conf.Props.Port),
 		Handler: mux,

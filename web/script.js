@@ -7,16 +7,20 @@ window.onload = function() {
   });
   document.getElementById("read-filter").addEventListener("change", function(ev) {
     activateRssFilter();
-  })
+  });
   document.getElementById("list-read").addEventListener("click", function(ev) {
     markListRead();
-  })
+  });
   document.getElementById("channel-filter").addEventListener("change", function(ev) {
-    renderYt();
-  })
+    //renderYt();
+    activateYTSeenFilter();
+  });
   document.getElementById("yt-seen-filter").addEventListener("change", function(ev) {
     activateYTSeenFilter();
-  })
+  });
+  document.getElementById("list-read-yt").addEventListener("click", function(ev) {
+    markYTListRead();
+  });
   renderRssSources();
   renderYtSources();
   renderRSS();
@@ -55,6 +59,37 @@ function markListRead() {
         else
           nothinghere.innerText = "It seems there is nothing here...";
         feedList.appendChild(nothinghere);
+      }
+    })
+    .catch(error => {
+      console.log(error)
+    });
+}
+
+function markYTListRead() {
+  let filter = document.getElementById("yt-seen-filter").value;
+  let channel = document.getElementById("channel-filter").value;
+
+  if (filter != "new") return;
+
+  fetch("/yt/" + channel + "/markAll")
+    .then(response => {
+      if (!response.ok) {
+        throw new Error("Error collection YT feed with filter " + channel);
+      } else {
+        let videoList = document.getElementById("video-list");
+        let notificationBubble = document.getElementById("youtube-bubble");
+        notificationBubble.innerText = notificationBubble.innerText - videoList.children.length;
+        videoList.innerHTML = "";
+        let nothinghere = document.createElement("h2")
+        nothinghere.style = "margin-top: 3%; margin-left: 1%";
+        if (filter == "watched")
+          nothinghere.innerText = "It seems you have read it all...";
+        else if (filter == "favourite")
+          nothinghere.innerText = "It seems you haven't favourited anything...";
+        else
+          nothinghere.innerText = "It seems there is nothing here...";
+        videoList.appendChild(nothinghere);
       }
     })
     .catch(error => {
@@ -208,7 +243,7 @@ function renderYtJson(ytJsonList) {
     else
       nothinghere.innerText = "It seems there is nothing here...";
     videoList.appendChild(nothinghere);
-    if (readFilter == "new") document.getElementById("yt-bubble").innerText = 0;
+    if (readFilter == "new") document.getElementById("youtube-bubble").innerText = 0;
     return;
   }
 
@@ -390,8 +425,8 @@ function renderYt() {
       return response.json();
     })
     .then(jsonYtFeed => {
-      document.getElementById("youtube-bubble").innerText = jsonYtFeed.length;
       renderYtJson(jsonYtFeed)
+      document.getElementById("youtube-bubble").innerText = ytJsonList.length;
     })
     .catch(error => {
       console.log(error)

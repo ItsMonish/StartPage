@@ -195,3 +195,17 @@ func DeleteYTItem(id int) error {
 
 	return nil
 }
+
+func GetYTFilterSlice(channel string) ([]JsonYtItem, error) {
+	if channel == "all" {
+		return totalFeed, nil
+	}
+
+	returnList, ok := channelFeed[channel]
+
+	if !ok {
+		return nil, errors.New("Error getting channel " + channel)
+	}
+
+	return returnList, nil
+}
