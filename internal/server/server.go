@@ -3,6 +3,7 @@ package server
 import (
 	"html/template"
 	"io"
+	"io/fs"
 	"log"
 	"net/http"
 	"os"
@@ -10,6 +11,7 @@ import (
 	"strconv"
 	"syscall"
 
+	embeds "github.com/ItsMonish/StartPage"
 	"github.com/ItsMonish/StartPage/internal/collector"
 	"github.com/ItsMonish/StartPage/internal/config"
 	"github.com/ItsMonish/StartPage/internal/database"
@@ -21,12 +23,13 @@ func StartServer(logger *log.Logger, conf config.Configuration) {
 
 	mux := http.NewServeMux()
 
-	fs := http.FileServer(http.Dir("./web/"))
+	content, _ := fs.Sub(embeds.StaticAssets, "web")
+	fileSystem := http.FileServer(http.FS(content))
 
-	mux.Handle("/assets/", http.StripPrefix("/assets/", fs))
+	mux.Handle("/assets/", http.StripPrefix("/assets/", fileSystem))
 
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		templateObject := template.Must(template.ParseFiles("./template/startpage.html"))
+		templateObject := template.Must(template.New("root").Parse(embeds.TemplateHTML))
 		templateObject.Execute(w, conf.Links)
 	})
 
