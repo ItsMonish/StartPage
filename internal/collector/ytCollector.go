@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/ItsMonish/StartPage/internal/config"
+	"github.com/ItsMonish/StartPage/internal/database"
 )
 
 var (
@@ -133,8 +134,12 @@ func convertXMLtoJSONObject(feed []XmlYtItem, channel string, id *int) ([]JsonYt
 			return nil, errors.New("Error parsing time")
 		}
 
-		returnList = append(returnList, currentJsonItem)
-		*id++
+		if truth, err := database.IsYtItemInHistory(currentJsonItem.Link); !truth {
+			returnList = append(returnList, currentJsonItem)
+			*id++
+		} else if err != nil {
+			return nil, err
+		}
 	}
 
 	return returnList, nil

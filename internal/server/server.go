@@ -350,6 +350,46 @@ func StartServer(logger *log.Logger, conf config.Configuration) {
 		io.WriteString(w, content)
 	})
 
+	mux.HandleFunc("POST /yt/item/favourite", func(w http.ResponseWriter, r *http.Request) {
+		body, err := io.ReadAll(r.Body)
+
+		if err != nil {
+			logger.Println("Error parsing POST body")
+		}
+
+		link := string(body)
+
+		err = database.AddToYtFavourites(link)
+
+		if err != nil {
+			logger.Println(err)
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+
+		w.WriteHeader(http.StatusOK)
+	})
+
+	mux.HandleFunc("POST /yt/item/unfavourite", func(w http.ResponseWriter, r *http.Request) {
+		body, err := io.ReadAll(r.Body)
+
+		if err != nil {
+			logger.Println("Error parsing POST body")
+		}
+
+		link := string(body)
+
+		err = database.RemoveFromYtFavourites(link)
+
+		if err != nil {
+			logger.Println(err)
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+
+		w.WriteHeader(http.StatusOK)
+	})
+
 	clientServer := &http.Server{
 		Addr:    ":" + strconv.Itoa(conf.Props.Port),
 		Handler: mux,

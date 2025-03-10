@@ -243,11 +243,11 @@ function renderYtJson(ytJsonList) {
       infoDiv.appendChild(watchedAt);
       if (!item.isFavourite) {
         favButton.title = "Mark as Favourite";
-        favButton.setAttribute("onclick", `event.stopPropagation();console.log(this, "${item.link}")`);
+        favButton.setAttribute("onclick", `event.stopPropagation();markAsYtFavourite(this, "${item.link}")`);
         favButton.innerHTML = `&#x2606`;
       } else {
         favButton.title = "Unmark as Favourite";
-        favButton.setAttribute("onclick", `event.stopPropagation();console.log(this, "${item.link}")`);
+        favButton.setAttribute("onclick", `event.stopPropagation();unmarkAsYtFavourite(this, "${item.link}")`);
         favButton.innerHTML = `&#x2605`;
       }
       videoActionDiv.appendChild(favButton)
@@ -305,6 +305,47 @@ function unmarkAsFavourite(caller, link) {
         caller.innerHTML = `&#x2606`;
         caller.title = "Mark as Favourite";
         caller.setAttribute("onclick", `event.stopPropagation(); markAsFavourite(this, "${link}");`)
+      }
+    })
+    .catch(error => {
+      console.log(error)
+    });
+}
+
+function markAsYtFavourite(caller, link) {
+  fetch("/yt/item/favourite", {
+    method: "POST",
+    body: link
+  })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error("Error marking item as favourite");
+      }
+      caller.innerHTML = `&#x2605`;
+      caller.title = "Unmark as Favourite";
+      caller.setAttribute("onclick", `event.stopPropagation(); unmarkAsYtFavourite(this, "${link}");`)
+    })
+    .catch(error => {
+      console.log(error)
+    });
+}
+
+function unmarkAsYtFavourite(caller, link) {
+  fetch("/yt/item/unfavourite", {
+    method: "POST",
+    body: link
+  })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error("Error unmarking item as favourite");
+      }
+      let readFilter = document.getElementById("yt-seen-filter").value;
+      if (readFilter == "favourites") {
+        caller.parentElement.remove();
+      } else {
+        caller.innerHTML = `&#x2606`;
+        caller.title = "Mark as Favourite";
+        caller.setAttribute("onclick", `event.stopPropagation(); markAsYtFavourite(this, "${link}");`)
       }
     })
     .catch(error => {
