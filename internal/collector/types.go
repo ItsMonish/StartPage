@@ -16,6 +16,20 @@ type XmlRssFeed struct {
 	Feed     []XmlRssItem `xml:"channel>item"`
 }
 
+type XmlAtomFeed struct {
+	Feed []XmlAtomItem `xml:"entry"`
+}
+
+type XmlAtomItem struct {
+	Title   string          `xml:"title"`
+	Link    XmlAtomItemLink `xml:"link"`
+	PubDate string          `xml:"published"`
+}
+
+type XmlAtomItemLink struct {
+	Value string `xml:"href,attr"`
+}
+
 type JsonFeedItem struct {
 	ID       int       `json:"id"`
 	Title    string    `json:"title"`

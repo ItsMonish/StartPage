@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"slices"
 	"sort"
+	"strings"
 	"time"
 
 	"github.com/ItsMonish/StartPage/internal/config"
@@ -50,14 +51,28 @@ func RefreshRssFeed(logger *log.Logger, rssList map[string][]config.TitleURLItem
 			defer resp.Body.Close()
 
 			body, _ := io.ReadAll(resp.Body)
-
 			var xmlFeed XmlRssFeed
-
 			xmlFeed.Source = item.Title
 			xmlFeed.Category = category
 
-			if err := xml.Unmarshal(body, &xmlFeed); err != nil {
-				logger.Println("Error unmarshalling contents from", item.Url)
+			if isAtomFeed(string(body)) {
+				var atomFeed XmlAtomFeed
+				if err := xml.Unmarshal(body, &atomFeed); err != nil {
+					logger.Println("Error unmarshalling atom feed from", item.Url)
+				}
+				var targetXmlItem XmlRssItem
+				for _, atomItem := range atomFeed.Feed {
+					targetXmlItem.Link = atomItem.Link.Value
+					targetXmlItem.Title = atomItem.Title
+					targetXmlItem.PubDate = atomItem.PubDate
+
+					xmlFeed.Feed = append(xmlFeed.Feed, targetXmlItem)
+				}
+
+			} else {
+				if err := xml.Unmarshal(body, &xmlFeed); err != nil {
+					logger.Println("Error unmarshalling contents from", item.Url)
+				}
 			}
 
 			xmlFeeds = append(xmlFeeds, xmlFeed)
@@ -237,4 +252,12 @@ func GetSourceSlice(source string) ([]JsonFeedItem, error) {
 	}
 
 	return returnList, nil
+}
+
+func isAtomFeed(feed string) bool {
+	if strings.Contains(feed, "<feed") {
+		return true
+	} else {
+		return false
+	}
 }
