@@ -3,7 +3,6 @@ package config
 import (
 	"log"
 	"os"
-	"syscall"
 
 	"gopkg.in/yaml.v3"
 )
@@ -40,7 +39,7 @@ func GetConfig(logger *log.Logger, configPath string) Configuration {
 	configFile, err := os.Open(configPath)
 	if err != nil {
 		logger.Fatal("There was an error reading config file at " + configPath)
-		syscall.Kill(syscall.Getpid(), syscall.SIGINT)
+		os.Exit(1)
 	}
 
 	defer configFile.Close()
@@ -53,7 +52,7 @@ func GetConfig(logger *log.Logger, configPath string) Configuration {
 	if err := yamlDecoder.Decode(&config); err != nil {
 		logger.Fatal("Error reading the config file")
 		logger.Fatal("Check syntax of the file")
-		syscall.Kill(syscall.Getpid(), syscall.SIGINT)
+		os.Exit(1)
 	}
 
 	return config
