@@ -25,15 +25,11 @@ var (
 )
 
 func RefreshYtFeed(logger *log.Logger, ytItems []config.TitleURLItem) {
-	if channelList == nil {
-		channelList = make([]string, 0)
-	}
-	if channelFeed == nil {
-		channelFeed = make(map[string][]JsonYtItem)
-	}
-	if totalFeed == nil {
-		totalFeed = make([]JsonYtItem, 0)
-	}
+	channelList = make([]string, 0)
+	channelFeed = make(map[string][]JsonYtItem)
+	totalFeed = make([]JsonYtItem, 0)
+	strFeed = ""
+	chListStr = ""
 
 	for _, item := range ytItems {
 		var fromXmlFeed XmlYtFeed
