@@ -64,7 +64,8 @@ func RefreshRssFeed(logger *log.Logger, rssList map[string][]config.TitleURLItem
 				for _, atomItem := range atomFeed.Feed {
 					targetXmlItem.Link = atomItem.Link.Value
 					targetXmlItem.Title = atomItem.Title
-					targetXmlItem.PubDate = atomItem.PubDate
+					givenTime, _ := time.Parse(time.RFC3339, atomItem.PubDate)
+					targetXmlItem.PubDate = givenTime.Format(time.RFC1123Z)
 
 					xmlFeed.Feed = append(xmlFeed.Feed, targetXmlItem)
 				}
