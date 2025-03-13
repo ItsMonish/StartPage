@@ -28,12 +28,10 @@ var (
 func RefreshRssFeed(logger *log.Logger, rssList map[string][]config.TitleURLItem) {
 	var xmlFeeds []XmlRssFeed
 
-	if sources == nil {
-		sources = make(map[string][]string)
-	}
-	if sourceFeed == nil {
-		sourceFeed = make(map[string][]JsonFeedItem)
-	}
+	sources = make(map[string][]string)
+	sourceFeed = make(map[string][]JsonFeedItem)
+	rssJsonString = ""
+	rssJsonItems = make([]JsonFeedItem, 0)
 
 	for category, items := range rssList {
 
