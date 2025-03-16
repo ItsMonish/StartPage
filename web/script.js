@@ -28,6 +28,10 @@ window.onload = function() {
   document.getElementById("read-filter").selectedIndex = 0;
   document.getElementById("yt-seen-filter").selectedIndex = 0;
   document.getElementById("channel-filter").selectedIndex = 0;
+  intervalId = setInterval(function() {
+    activateRssFilter();
+    activateYTSeenFilter();
+  }, 300000); // 5 minute delay
 }
 
 function searchDDG() {
