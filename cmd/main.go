@@ -33,9 +33,9 @@ func main() {
 
 	flag.Parse()
 
-	if logging {
+	if !logging {
 		logFile, _ := os.OpenFile(logFilePath, os.O_APPEND|os.O_CREATE|os.O_RDWR, 0644)
-		wrt := io.MultiWriter(os.Stdout, logFile)
+		wrt := io.Writer(logFile)
 		log.SetOutput(wrt)
 		logger = log.New(wrt, "", log.LUTC|log.LstdFlags|log.Lshortfile)
 	} else {
