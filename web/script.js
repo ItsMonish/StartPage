@@ -176,6 +176,7 @@ function renderRssJson(jsonRssFeed) {
     if (readFilter == "unread") document.getElementById("rss-bubble").innerText = 0;
     return;
   }
+  document.getElementById("rss-bubble").innerText = jsonRssFeed.length;
 
   for (let idx = 0; idx < jsonRssFeed.length; idx++) {
     let curObj = jsonRssFeed[idx];
@@ -250,6 +251,8 @@ function renderYtJson(ytJsonList) {
     if (readFilter == "new") document.getElementById("youtube-bubble").innerText = 0;
     return;
   }
+
+  document.getElementById("youtube-bubble").innerText = ytJsonList.length;
 
   for (let item of ytJsonList) {
     let videoDiv = document.createElement("div");
