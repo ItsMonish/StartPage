@@ -1,6 +1,8 @@
 # Server and other properties
 properties:
+  # Port to run the server on
   port: 8080
+  # Time for feeds to be refreshed from sources (in minutes)
   refreshInterval: 60
 
 # Quick links to be displayed under search bar in Main page
