@@ -384,3 +384,34 @@ select:hover {
 .favorite-btn:hover {
   background-color: #666;
 }
+
+*::-webkit-scrollbar {
+  height: 10px;
+  width: 10px;
+}
+
+*::-webkit-scrollbar-track {
+  border-radius: 5px;
+  background-color: #000000;
+}
+
+*::-webkit-scrollbar-track:hover {
+  background-color: #000000;
+}
+
+*::-webkit-scrollbar-track:active {
+  background-color: #000000;
+}
+
+*::-webkit-scrollbar-thumb {
+  border-radius: 5px;
+  background-color: #404040;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background-color: #505050;
+}
+
+*::-webkit-scrollbar-thumb:active {
+  background-color: #505050;
+}
