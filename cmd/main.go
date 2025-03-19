@@ -37,9 +37,9 @@ func main() {
 		logFile, _ := os.OpenFile(logFilePath, os.O_APPEND|os.O_CREATE|os.O_RDWR, 0644)
 		wrt := io.Writer(logFile)
 		log.SetOutput(wrt)
-		logger = log.New(wrt, "", log.LUTC|log.LstdFlags|log.Lshortfile)
+		logger = log.New(wrt, "", log.Ldate|log.Ltime|log.LstdFlags|log.Lshortfile)
 	} else {
-		logger = log.New(os.Stdout, "", log.LUTC|log.LstdFlags|log.Lshortfile)
+		logger = log.New(os.Stdout, "", log.Ldate|log.Ltime|log.LstdFlags|log.Lshortfile)
 	}
 
 	conf := config.GetConfig(logger, configPath)
