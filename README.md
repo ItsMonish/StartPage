@@ -1,5 +1,6 @@
 # StartPage
 A simple start page that gives a minimal search bar and a few quick links. It is also a RSS/Atom feed and Youtube feed aggregator. 
+![display image](assets/display.png)
 ## Installation:
 - The application only requires a binary/executable and a configuration file to work. Additionally a database file (sqlite) and log file is created in the configuration folder. These are the only artifacts you need to care about if you choose to uninstall the application.
 - **Note**: The database file and log file will be created by the application by itself in the config directory. 
