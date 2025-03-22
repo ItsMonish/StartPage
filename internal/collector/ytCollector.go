@@ -84,7 +84,10 @@ func RefreshYtFeed(logger *log.Logger, ytItems []config.TitleURLItem) bool {
 }
 
 func GetFullYtFeed() string {
-	return strFeed
+	if strFeed != "" {
+		return strFeed
+	}
+	return "[]"
 }
 
 func GetYtChannelList() (string, error) {
