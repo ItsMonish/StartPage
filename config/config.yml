@@ -4,6 +4,8 @@ properties:
   port: 8080
   # Time for feeds to be refreshed from sources (in minutes)
   refreshInterval: 60
+  # Interval to retry collection in case of any errors (in minutes)
+  retryInterval: 5
 
 # Quick links to be displayed under search bar in Main page
 # list[1,2,3,4]Names field indicate the name for the column

@@ -17,6 +17,7 @@ type Configuration struct {
 type Properties struct {
 	Port            int `yaml:"port"`
 	RefreshInterval int `yaml:"refreshInterval"`
+	RetryInterval   int `yaml:"retryInterval"`
 }
 
 type TitleURLItem struct {
@@ -53,6 +54,13 @@ func GetConfig(logger *log.Logger, configPath string) Configuration {
 		logger.Fatal("Error reading the config file")
 		logger.Fatal("Check syntax of the file")
 		os.Exit(1)
+	}
+
+	if config.Props.RetryInterval == 0 {
+		config.Props.RetryInterval = 5
+	}
+	if config.Props.RefreshInterval == 0 {
+		config.Props.RefreshInterval = 60
 	}
 
 	return config
