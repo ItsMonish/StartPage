@@ -15,10 +15,20 @@ func updateWithInterval(interval int) time.Time {
 func startServerRoutine(logger *log.Logger, stopRoutine chan bool, conf config.Configuration) {
 	nextRefresh := updateWithInterval(conf.Props.RefreshInterval)
 
-	collector.RefreshRssFeed(logger, conf.Rss)
-	logger.Println("Collected from RSS sources")
-	collector.RefreshYtFeed(logger, conf.Yt)
-	logger.Println("Collected from YT sources")
+	eFlag := collector.RefreshRssFeed(logger, conf.Rss)
+	if eFlag {
+		logger.Println("There was some error in collecting RSS feed. Retrying in", conf.Props.RetryInterval, "minutes")
+		nextRefresh = updateWithInterval(conf.Props.RefreshInterval)
+	} else {
+		logger.Println("Collected from RSS sources successfully")
+	}
+	eFlag = collector.RefreshYtFeed(logger, conf.Yt)
+	if eFlag {
+		logger.Println("There was some error in collecting YT feed. Retrying in", conf.Props.RetryInterval, "minutes")
+		nextRefresh = updateWithInterval(conf.Props.RefreshInterval)
+	} else {
+		logger.Println("Collected from YT sources successfully")
+	}
 
 	for {
 		select {

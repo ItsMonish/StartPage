@@ -25,8 +25,9 @@ var (
 	CurrentId       int = 1
 )
 
-func RefreshRssFeed(logger *log.Logger, rssList map[string][]config.TitleURLItem) {
+func RefreshRssFeed(logger *log.Logger, rssList map[string][]config.TitleURLItem) bool {
 	var xmlFeeds []XmlRssFeed
+	errFlag := false
 
 	sources = make(map[string][]string)
 	sourceFeed = make(map[string][]JsonFeedItem)
@@ -44,6 +45,8 @@ func RefreshRssFeed(logger *log.Logger, rssList map[string][]config.TitleURLItem
 
 			if err != nil {
 				logger.Println("Error collecting from", item.Url)
+				errFlag = true
+				continue
 			}
 
 			defer resp.Body.Close()
@@ -129,6 +132,7 @@ func RefreshRssFeed(logger *log.Logger, rssList map[string][]config.TitleURLItem
 	sourcesCont, err := json.Marshal(sources)
 
 	sourcesAsString = string(sourcesCont)
+	return errFlag
 
 }
 

@@ -24,12 +24,13 @@ var (
 	ID          int = 1
 )
 
-func RefreshYtFeed(logger *log.Logger, ytItems []config.TitleURLItem) {
+func RefreshYtFeed(logger *log.Logger, ytItems []config.TitleURLItem) bool {
 	channelList = make([]string, 0)
 	channelFeed = make(map[string][]JsonYtItem)
 	totalFeed = make([]JsonYtItem, 0)
 	strFeed = ""
 	chListStr = ""
+	errFlag := false
 
 	for _, item := range ytItems {
 		var fromXmlFeed XmlYtFeed
@@ -41,6 +42,8 @@ func RefreshYtFeed(logger *log.Logger, ytItems []config.TitleURLItem) {
 
 		if err != nil {
 			logger.Println("Error getting youtube feed from", item.Title)
+			errFlag = true
+			continue
 		}
 
 		defer resp.Body.Close()
@@ -77,6 +80,7 @@ func RefreshYtFeed(logger *log.Logger, ytItems []config.TitleURLItem) {
 	}
 
 	strFeed = string(jsonContent)
+	return errFlag
 }
 
 func GetFullYtFeed() string {
