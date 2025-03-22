@@ -18,14 +18,14 @@ func startServerRoutine(logger *log.Logger, stopRoutine chan bool, conf config.C
 	eFlag := collector.RefreshRssFeed(logger, conf.Rss)
 	if eFlag {
 		logger.Println("There was some error in collecting RSS feed. Retrying in", conf.Props.RetryInterval, "minutes")
-		nextRefresh = updateWithInterval(conf.Props.RefreshInterval)
+		nextRefresh = updateWithInterval(conf.Props.RetryInterval)
 	} else {
 		logger.Println("Collected from RSS sources successfully")
 	}
 	eFlag = collector.RefreshYtFeed(logger, conf.Yt)
 	if eFlag {
 		logger.Println("There was some error in collecting YT feed. Retrying in", conf.Props.RetryInterval, "minutes")
-		nextRefresh = updateWithInterval(conf.Props.RefreshInterval)
+		nextRefresh = updateWithInterval(conf.Props.RetryInterval)
 	} else {
 		logger.Println("Collected from YT sources successfully")
 	}
@@ -37,11 +37,23 @@ func startServerRoutine(logger *log.Logger, stopRoutine chan bool, conf config.C
 			return
 		default:
 			if time.Now().After(nextRefresh) {
-				collector.RefreshRssFeed(logger, conf.Rss)
-				logger.Println("Colleced from RSS sources")
-				collector.RefreshYtFeed(logger, conf.Yt)
-				logger.Println("Collected from YT sources")
-				nextRefresh = updateWithInterval(conf.Props.RefreshInterval)
+				e1Flag := collector.RefreshRssFeed(logger, conf.Rss)
+				if e1Flag {
+					logger.Println("There was some error in collecting RSS feed. Retrying in", conf.Props.RetryInterval, "minutes")
+					nextRefresh = updateWithInterval(conf.Props.RetryInterval)
+				} else {
+					logger.Println("Collected from RSS sources successfully")
+				}
+				e2Flag := collector.RefreshYtFeed(logger, conf.Yt)
+				if e2Flag {
+					logger.Println("There was some error in collecting YT feed. Retrying in", conf.Props.RetryInterval, "minutes")
+					nextRefresh = updateWithInterval(conf.Props.RetryInterval)
+				} else {
+					logger.Println("Collected from YT sources successfully")
+				}
+				if !e1Flag && !e2Flag {
+					nextRefresh = updateWithInterval(conf.Props.RefreshInterval)
+				}
 			} else {
 				time.Sleep(time.Minute)
 			}

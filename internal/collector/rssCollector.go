@@ -44,7 +44,7 @@ func RefreshRssFeed(logger *log.Logger, rssList map[string][]config.TitleURLItem
 			resp, err := http.Get(item.Url)
 
 			if err != nil {
-				logger.Println("Error collecting from", item.Url)
+				logger.Println("Error collecting from", item.Title)
 				errFlag = true
 				continue
 			}
