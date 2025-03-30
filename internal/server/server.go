@@ -10,6 +10,7 @@ import (
 	"os/signal"
 	"strconv"
 	"syscall"
+	"time"
 
 	embeds "github.com/ItsMonish/StartPage"
 	"github.com/ItsMonish/StartPage/internal/collector"
@@ -18,8 +19,11 @@ import (
 )
 
 var jsonRssFeed string
+var isServerRoutineLive bool
 
 func StartServer(logger *log.Logger, conf config.Configuration, configPath string) {
+	quitServer := make(chan os.Signal, 1)
+	stopRoutine := make(chan bool, 1)
 
 	mux := http.NewServeMux()
 
@@ -437,6 +441,8 @@ func StartServer(logger *log.Logger, conf config.Configuration, configPath strin
 		logger.Println("Request for refresh recieved. Initiating refresh")
 		conf = config.GetConfig(logger, configPath)
 
+		stopRoutine <- true
+
 		e1Flag := collector.RefreshRssFeed(logger, conf.Rss)
 		if e1Flag {
 			logger.Println("There was some error in collecting RSS feed. Retrying in", conf.Props.RetryInterval, "minutes")
@@ -450,6 +456,14 @@ func StartServer(logger *log.Logger, conf config.Configuration, configPath strin
 			logger.Println("Collected from YT sources successfully")
 		}
 
+		go func() {
+			for isServerRoutineLive {
+				time.Sleep(2 * time.Second)
+			}
+			go startServerRoutine(logger, stopRoutine, conf)
+			isServerRoutineLive = true
+		}()
+
 		w.WriteHeader(http.StatusOK)
 	})
 
@@ -458,8 +472,6 @@ func StartServer(logger *log.Logger, conf config.Configuration, configPath strin
 		Handler: mux,
 	}
 
-	quitServer := make(chan os.Signal, 1)
-	stopRoutine := make(chan bool, 1)
 	signal.Notify(quitServer, syscall.SIGTERM, syscall.SIGABRT, syscall.SIGINT)
 
 	go func() {
@@ -479,6 +491,7 @@ func StartServer(logger *log.Logger, conf config.Configuration, configPath strin
 	}()
 
 	go startServerRoutine(logger, stopRoutine, conf)
+	isServerRoutineLive = true
 
 	logger.Println("Server starting at: ", conf.Props.Port)
 

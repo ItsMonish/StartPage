@@ -33,6 +33,7 @@ func startServerRoutine(logger *log.Logger, stopRoutine chan bool, conf config.C
 	for {
 		select {
 		case <-stopRoutine:
+			isServerRoutineLive = false
 			logger.Println("Stopping server routine")
 			return
 		default:
