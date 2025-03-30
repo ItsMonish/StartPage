@@ -19,7 +19,7 @@ import (
 
 var jsonRssFeed string
 
-func StartServer(logger *log.Logger, conf config.Configuration) {
+func StartServer(logger *log.Logger, conf config.Configuration, configPath string) {
 
 	mux := http.NewServeMux()
 
@@ -428,6 +428,26 @@ func StartServer(logger *log.Logger, conf config.Configuration) {
 		}
 		for _, item := range sourceList {
 			collector.DeleteYTItem(item.ID)
+		}
+
+		w.WriteHeader(http.StatusOK)
+	})
+
+	mux.HandleFunc("/refreshPage", func(w http.ResponseWriter, r *http.Request) {
+		logger.Println("Request for refresh recieved. Initiating refresh")
+		conf = config.GetConfig(logger, configPath)
+
+		e1Flag := collector.RefreshRssFeed(logger, conf.Rss)
+		if e1Flag {
+			logger.Println("There was some error in collecting RSS feed. Retrying in", conf.Props.RetryInterval, "minutes")
+		} else {
+			logger.Println("Collected from RSS sources successfully")
+		}
+		e2Flag := collector.RefreshYtFeed(logger, conf.Yt)
+		if e2Flag {
+			logger.Println("There was some error in collecting YT feed. Retrying in", conf.Props.RetryInterval, "minutes")
+		} else {
+			logger.Println("Collected from YT sources successfully")
 		}
 
 		w.WriteHeader(http.StatusOK)

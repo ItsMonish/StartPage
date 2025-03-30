@@ -158,7 +158,18 @@ body {
 .card {
   left: 0vw;
   right: 20vw;
-  height: 33.3vh;
+  height: 31vh;
+}
+
+.refresh-icon {
+  background-color: #000;
+}
+
+.ref-card {
+  left: 0vw;
+  right: 20vw;
+  height: 7vh;
+  background-color: #000000;
 }
 
 .search-card {

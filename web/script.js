@@ -40,6 +40,19 @@ function searchDDG() {
   document.getElementById("search-query").value = "";
 }
 
+function initRefresh() {
+  fetch("/refreshPage")
+    .then(response => {
+      if (!response.ok) {
+        throw new error("Error refreshing");
+      }
+      location.reload();
+    })
+    .catch(err => {
+      console.error(err);
+    })
+}
+
 function markListRead() {
   let filter = document.getElementById("category-filter").value;
   let readFilter = document.getElementById("read-filter").value;

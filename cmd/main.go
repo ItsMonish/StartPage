@@ -47,5 +47,5 @@ func main() {
 	//Command line value takes precedence over config value
 	conf.Props.Port = port
 
-	server.StartServer(logger, conf)
+	server.StartServer(logger, conf, configPath)
 }
