@@ -41,7 +41,14 @@ func RefreshRssFeed(logger *log.Logger, rssList map[string][]config.TitleURLItem
 			sources[category] = append(sources[category], item.Title)
 			sourceFeed[item.Title] = make([]JsonFeedItem, 0)
 
-			resp, err := http.Get(item.Url)
+			req, err := http.NewRequest("GET", item.Url, nil)
+			req.Header.Set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36")
+			req.Header.Set("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
+			req.Header.Set("Accept-Language", "en-US,en;q=0.5")
+			req.Header.Set("Connection", "keep-alive")
+
+			client := &http.Client{}
+			resp, err := client.Do(req)
 
 			if err != nil {
 				logger.Println("Error collecting from", item.Title)
@@ -73,6 +80,7 @@ func RefreshRssFeed(logger *log.Logger, rssList map[string][]config.TitleURLItem
 
 			} else {
 				if err := xml.Unmarshal(body, &xmlFeed); err != nil {
+					logger.Println(err)
 					logger.Println("Error unmarshalling contents from", item.Url)
 				}
 			}
