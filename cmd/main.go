@@ -8,6 +8,7 @@ import (
 	"os"
 
 	"github.com/ItsMonish/StartPage/internal/config"
+	"github.com/ItsMonish/StartPage/internal/server"
 )
 
 var (
@@ -43,5 +44,6 @@ func main() {
 
 	config := config.GetConfig(logger, configPath)
 
-	fmt.Println(config)
+	server.StartServer(logger, config)
+
 }
