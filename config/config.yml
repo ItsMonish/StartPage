@@ -6,6 +6,8 @@ properties:
   refreshInterval: 60
   # Interval to retry collection in case of any errors (in minutes)
   retryInterval: 5
+  # Database file location path relative to home directory
+  dbPath: .config/startpage/database.db
 
 # Quick links to be displayed under search bar in Main page
 # list[1,2,3,4]Names field indicate the name for the column
