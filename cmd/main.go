@@ -8,6 +8,7 @@ import (
 	"os"
 
 	"github.com/ItsMonish/StartPage/internal/config"
+	"github.com/ItsMonish/StartPage/internal/database"
 	"github.com/ItsMonish/StartPage/internal/server"
 )
 
@@ -43,6 +44,13 @@ func main() {
 	}
 
 	config := config.GetConfig(logger, configPath)
+
+	err := database.InitDb(config.Props.DatabasePath)
+	if err != nil {
+		logger.Println("Error in initializing the database")
+		logger.Println(err.Error())
+		os.Exit(1)
+	}
 
 	server.StartServer(logger, config)
 

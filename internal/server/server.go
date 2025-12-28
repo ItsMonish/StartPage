@@ -11,11 +11,13 @@ import (
 	"syscall"
 
 	embeds "github.com/ItsMonish/StartPage"
+	"github.com/ItsMonish/StartPage/internal/database"
 	"github.com/ItsMonish/StartPage/internal/types"
 )
 
 func StartServer(logger *log.Logger, conf types.RootConfiguration) {
 	quitServerChan := make(chan os.Signal, 1)
+	signal.Notify(quitServerChan, syscall.SIGTERM, syscall.SIGABRT, syscall.SIGINT)
 
 	mux := http.NewServeMux()
 
@@ -34,13 +36,12 @@ func StartServer(logger *log.Logger, conf types.RootConfiguration) {
 		Handler: mux,
 	}
 
-	signal.Notify(quitServerChan, syscall.SIGTERM, syscall.SIGABRT, syscall.SIGINT)
-
 	go func() {
 		<-quitServerChan
 
-		logger.Println("Closing server...")
+		database.CloseDbInstance()
 
+		logger.Println("Closing server...")
 		if err := clientServer.Close(); err != nil {
 			logger.Println("Error closing server gracefully")
 		}
