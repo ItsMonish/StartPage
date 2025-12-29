@@ -14,6 +14,7 @@ import (
 
 var (
 	configPath string
+	dbPath     string
 	port       int
 	logging    bool
 	logger     *log.Logger
@@ -23,8 +24,10 @@ func main() {
 	userConfig, _ := os.UserConfigDir()
 	defaultConfig := userConfig + "/startpage/config.yml"
 	logFilePath := userConfig + "/startpage/application.log"
+	defaultDb := userConfig + "/startpage/database.db"
 
 	flag.StringVar(&configPath, "config", defaultConfig, "Path to the config file")
+	flag.StringVar(&dbPath, "db", defaultDb, "Path to the database file")
 	flag.IntVar(&port, "port", 8080, "Port to open the server on")
 	flag.BoolVar(&logging, "log", false, "Redirect log to STDOUT")
 	flag.Usage = func() {
@@ -44,6 +47,7 @@ func main() {
 	}
 
 	config := config.GetConfig(logger, configPath)
+	config.Props.DatabasePath = dbPath
 
 	err := database.InitDb(config.Props.DatabasePath)
 	if err != nil {
