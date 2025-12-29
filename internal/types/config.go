@@ -11,7 +11,7 @@ type ConfigProperties struct {
 	Port            int    `yaml:"port"`
 	RefreshInterval int    `yaml:"refreshInterval"`
 	RetryInterval   int    `yaml:"retryInterval"`
-	DatabasePath    string `yaml:"dbPath`
+	DatabasePath    string `yaml:"dbPath"`
 }
 
 type ConfigTitleURLItem struct {
