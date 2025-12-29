@@ -11,6 +11,7 @@ import (
 	"syscall"
 
 	embeds "github.com/ItsMonish/StartPage"
+	"github.com/ItsMonish/StartPage/internal/collector"
 	"github.com/ItsMonish/StartPage/internal/database"
 	"github.com/ItsMonish/StartPage/internal/types"
 )
@@ -48,6 +49,8 @@ func StartServer(logger *log.Logger, conf types.RootConfiguration) {
 	}()
 
 	logger.Println("Starting server at port: ", conf.Props.Port)
+
+	go collector.InitRssCollector(logger, conf.Rss)
 
 	if err := clientServer.ListenAndServe(); err != nil {
 		logger.Println("Error starting server at port", conf.Props.Port)
