@@ -93,8 +93,8 @@ func createTablesIfNot() {
             title TEXT,
             source TEXT,
             category TEXT,
-            pubDate TEXT,
-		)
+            pubDate TEXT
+		);
 	`)
 
 	_, _ = dbInstance.Exec(`
@@ -103,7 +103,7 @@ func createTablesIfNot() {
 			thumbnail TEXT,
             title TEXT,
             channel TEXT,
-            pubDate TEXT,
+            pubDate TEXT
         );
     `)
 }
