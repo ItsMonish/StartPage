@@ -47,6 +47,7 @@ func main() {
 	}
 
 	config := config.GetConfig(logger, configPath)
+	config.Props.Port = port
 	config.Props.DatabasePath = dbPath
 
 	err := database.InitDb(config.Props.DatabasePath)
