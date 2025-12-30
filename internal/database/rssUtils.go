@@ -1,6 +1,9 @@
 package database
 
 import (
+	"errors"
+	"time"
+
 	"github.com/ItsMonish/StartPage/internal/types"
 )
 
@@ -58,4 +61,47 @@ func IsInRssCache(url string) bool {
 		return false
 	}
 	return true
+}
+
+func AddToRssHistory(rssItem types.JsonFeedItem) error {
+	db, _ := GetDbInstance()
+	row := db.QueryRow("SELECT MAX(sid) FROM RssHistory")
+
+	var maxSid int
+	err := row.Scan(&maxSid)
+	if err != nil {
+		maxSid = 0
+	}
+
+	var count int = 0
+	row = db.QueryRow("SELECT COUNT(*) FROM RssHistory WHERE source=?", rssItem.Source)
+	_ = row.Scan(&count)
+
+	for count >= 75 {
+		_, _ = db.Exec(`DELETE FROM RssHistory 
+						WHERE 
+						sid=(SELECT MIN(sid) FROM RssHistory 
+							WHERE
+							source=?)`, rssItem.Source)
+		count--
+	}
+
+	maxSid += 1
+	readAt := time.Now().String()
+
+	_, err = db.Exec(`INSERT INTO RssHistory VALUES(?,?,?,?,?,?,?)`,
+		maxSid,
+		rssItem.Link,
+		rssItem.Title,
+		rssItem.Source,
+		rssItem.Category,
+		rssItem.PubDate.String(),
+		readAt,
+	)
+
+	if err != nil {
+		return errors.New("Error inserting into History table")
+	}
+
+	return nil
 }

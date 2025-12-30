@@ -72,6 +72,22 @@ func StartServer(logger *log.Logger, conf types.RootConfiguration) {
 		io.WriteString(w, content)
 	})
 
+	mux.HandleFunc("/rss/{id}/read", func(w http.ResponseWriter, r *http.Request) {
+		id, err := strconv.Atoi(r.PathValue("id"))
+		if err != nil {
+			logger.Println("Invalid ID received for read: ", id)
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+
+		err = markRssIdAsRead(id)
+		if err != nil {
+			logger.Println(err)
+		}
+
+		w.WriteHeader(http.StatusOK)
+	})
+
 	clientServer := &http.Server{
 		Addr:    ":" + strconv.Itoa(conf.Props.Port),
 		Handler: mux,
@@ -96,4 +112,23 @@ func StartServer(logger *log.Logger, conf types.RootConfiguration) {
 		logger.Println("Error starting server at port", conf.Props.Port)
 		os.Exit(1)
 	}
+}
+
+func markRssIdAsRead(id int) error {
+	rssItem, err := collector.GetFeedItemWithId(id)
+	if err != nil {
+		return err
+	}
+
+	err = database.AddToRssHistory(rssItem)
+	if err != nil {
+		return err
+	}
+
+	err = collector.RemoveFeedItemWithId(id)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

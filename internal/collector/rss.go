@@ -4,7 +4,9 @@ import (
 	"encoding/json"
 	"encoding/xml"
 	"errors"
+	"fmt"
 	"log"
+	"slices"
 	"sort"
 	"strings"
 	"time"
@@ -192,6 +194,62 @@ func GetSourceFeed(source string) (string, error) {
 		return "", errors.New("Invalid Source")
 	}
 	return strSrcFeed[source], nil
+}
+
+func GetFeedItemWithId(id int) (types.JsonFeedItem, error) {
+	for _, item := range jsonFeed {
+		if item.ID == id {
+			return item, nil
+		}
+	}
+	return *new(types.JsonFeedItem), fmt.Errorf("Item with ID %d not found", id)
+}
+
+func RemoveFeedItemWithId(id int) error {
+	idx := 0
+	for ; idx < len(jsonFeed); idx++ {
+		if jsonFeed[idx].ID == id {
+			break
+		}
+	}
+	if idx == len(jsonFeed) {
+		return errors.New("Item not found with id")
+	}
+	item := jsonFeed[idx]
+
+	jsonFeed = slices.Delete(jsonFeed, idx, idx+1)
+	newContent, _ := json.Marshal(jsonFeed)
+	strJsonFeed = string(newContent)
+
+	idx = -1
+	for i, item := range sourceFeed[item.Source] {
+		if item.ID == id {
+			idx = i
+			break
+		}
+	}
+	if idx < 0 {
+		return nil
+	}
+	sourceFeed[item.Source] = slices.Delete(sourceFeed[item.Source], idx, idx+1)
+	newContent, _ = json.Marshal(sourceFeed[item.Source])
+	strSrcFeed[item.Source] = string(newContent)
+
+	idx = -1
+	for i, item := range sourceFeed[item.Category] {
+		if item.ID == id {
+			idx = i
+			break
+		}
+	}
+	if idx < 0 {
+		return nil
+	}
+	catFeed[item.Category] = slices.Delete(catFeed[item.Category], idx, idx+1)
+	newContent, _ = json.Marshal(catFeed[item.Category])
+	strCatFeed[item.Category] = string(newContent)
+
+	return nil
 }
 
 func isAtomFeed(feed string) bool {
