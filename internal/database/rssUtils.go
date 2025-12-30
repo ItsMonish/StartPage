@@ -43,8 +43,9 @@ func GetRssCachedItems() ([]types.JsonFeedItem, error) {
 func IsInRssHistory(url string) bool {
 	db, _ := GetDbInstance()
 
-	row := db.QueryRow(`SELECT * FROM RssHistory WHERE url=?`, url)
-	err := row.Scan(nil)
+	row := db.QueryRow(`SELECT sid FROM RssHistory WHERE url=?`, url)
+	var temp string
+	err := row.Scan(&temp)
 
 	if err != nil {
 		return false
@@ -55,8 +56,9 @@ func IsInRssHistory(url string) bool {
 func IsInRssCache(url string) bool {
 	db, _ := GetDbInstance()
 
-	row := db.QueryRow(`SELECT * FROM RssCache WHERE url=?`, url)
-	err := row.Scan(nil)
+	row := db.QueryRow(`SELECT title FROM RssCache WHERE url=?`, url)
+	var temp string
+	err := row.Scan(&temp)
 
 	if err != nil {
 		return false
