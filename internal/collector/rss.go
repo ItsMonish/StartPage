@@ -3,6 +3,7 @@ package collector
 import (
 	"encoding/json"
 	"encoding/xml"
+	"errors"
 	"log"
 	"sort"
 	"strings"
@@ -19,6 +20,7 @@ var (
 	jsonFeed   []types.JsonFeedItem
 	curId      int = 1
 
+	strSources  string = ""
 	strJsonFeed string = ""
 	strSrcFeed  map[string]string
 	strCatFeed  map[string]string
@@ -133,12 +135,15 @@ func RefreshRssFeed(logger *log.Logger, list map[string][]types.ConfigTitleURLIt
 		})
 		jCatCont, _ := json.Marshal(feed)
 		strCatFeed[category] = string(jCatCont)
-
 	}
 
-	logger.Println(strJsonFeed)
-	logger.Println(strCatFeed)
-	logger.Println(strSrcFeed)
+	srcJsonContent, err := json.Marshal(sources)
+	if err != nil {
+		logger.Println("Error in marshalling sources")
+		logger.Println(err)
+	}
+
+	strSources = string(srcJsonContent)
 }
 
 func LoadRssFromCache() error {
@@ -165,6 +170,28 @@ func LoadRssSources(conf map[string][]types.ConfigTitleURLItem) {
 			sources[category] = append(sources[category], item.Title)
 		}
 	}
+}
+
+func GetRssSources() string {
+	return strSources
+}
+
+func GetRssFullFeed() string {
+	return strJsonFeed
+}
+
+func GetCategoryFeed(category string) (string, error) {
+	if _, ok := strCatFeed[category]; !ok {
+		return "", errors.New("Invalid Category")
+	}
+	return strCatFeed[category], nil
+}
+
+func GetSourceFeed(source string) (string, error) {
+	if _, ok := strSrcFeed[source]; !ok {
+		return "", errors.New("Invalid Source")
+	}
+	return strSrcFeed[source], nil
 }
 
 func isAtomFeed(feed string) bool {

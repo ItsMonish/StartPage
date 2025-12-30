@@ -2,6 +2,7 @@ package server
 
 import (
 	"html/template"
+	"io"
 	"io/fs"
 	"log"
 	"net/http"
@@ -30,6 +31,45 @@ func StartServer(logger *log.Logger, conf types.RootConfiguration) {
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		templateObject := template.Must(template.New("root").Parse(embeds.TemplateHTML))
 		templateObject.Execute(w, conf.Links)
+	})
+
+	mux.HandleFunc("/rss", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Add("Content-Type", "application/json")
+		io.WriteString(w, collector.GetRssFullFeed())
+	})
+
+	mux.HandleFunc("/rss/all", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Add("Content-Type", "application/json")
+		io.WriteString(w, collector.GetRssFullFeed())
+	})
+
+	mux.HandleFunc("/rss/srcs", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Add("Content-Type", "application/json")
+		io.WriteString(w, collector.GetRssSources())
+	})
+
+	mux.HandleFunc("/rss/{category}", func(w http.ResponseWriter, r *http.Request) {
+		category := r.PathValue("category")
+		content, err := collector.GetCategoryFeed(category)
+		if err != nil {
+			logger.Println("Error in getting feed of category", category)
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+		w.Header().Add("Content-Type", "application/json")
+		io.WriteString(w, content)
+	})
+
+	mux.HandleFunc("/rss/{category}/{source}", func(w http.ResponseWriter, r *http.Request) {
+		source := r.PathValue("source")
+		content, err := collector.GetSourceFeed(source)
+		if err != nil {
+			logger.Println("Error in getting feed of source", source)
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+		w.Header().Add("Content-Type", "application/json")
+		io.WriteString(w, content)
 	})
 
 	clientServer := &http.Server{
