@@ -49,21 +49,11 @@ func createTablesIfNot() {
             source TEXT,
             category TEXT,
             pubDate TEXT,
-            readAt TEXT
+            readAt TEXT,
+			isFavourite INTEGER,
+			favouritedAt TEXT
         );
     `)
-
-	_, _ = dbInstance.Exec(`
-        CREATE TABLE IF NOT EXISTS RssFavourites(
-            url TEXT PRIMARY KEY,
-            title TEXT,
-            source TEXT,
-            category TEXT,
-            pubDate TEXT,
-            favouritedAt TEXT
-        );
-    `)
-
 	_, _ = dbInstance.Exec(`
         CREATE TABLE IF NOT EXISTS YtHistory(
 			sid INTEGER,
@@ -72,18 +62,9 @@ func createTablesIfNot() {
             title TEXT,
             channel TEXT,
             pubDate TEXT,
-            seenAt TEXT
-        );
-    `)
-
-	_, _ = dbInstance.Exec(`
-        CREATE TABLE IF NOT EXISTS YtFavourites(
-            url TEXT PRIMARY KEY,
-			thumbnail TEXT,
-            title TEXT,
-            channel TEXT,
-            pubDate TEXT,
-            favouritedAt TEXT
+            seenAt TEXT,
+			isFavourite INTEGER,
+			favouritedAt TEXT
         );
     `)
 

@@ -1,7 +1,8 @@
 package database
 
 import (
-	"errors"
+	"database/sql"
+	"encoding/json"
 	"time"
 
 	"github.com/ItsMonish/StartPage/internal/types"
@@ -89,7 +90,7 @@ func AddToRssHistory(rssItem types.JsonFeedItem) error {
 	maxSid += 1
 	readAt := time.Now().String()
 
-	_, err = db.Exec(`INSERT INTO RssHistory VALUES(?,?,?,?,?,?,?)`,
+	_, err = db.Exec(`INSERT INTO RssHistory VALUES(?,?,?,?,?,?,?,?,?)`,
 		maxSid,
 		rssItem.Link,
 		rssItem.Title,
@@ -97,11 +98,46 @@ func AddToRssHistory(rssItem types.JsonFeedItem) error {
 		rssItem.Category,
 		rssItem.PubDate.String(),
 		readAt,
+		0,
+		"",
 	)
 
 	if err != nil {
-		return errors.New("Error inserting into History table")
+		return err
 	}
 
 	return nil
+}
+
+func GetRssViewed(category string, source string) string {
+	db, err := GetDbInstance()
+
+	var rows *sql.Rows
+	if category == "" && source == "" {
+		rows, err = db.Query("SELECT * FROM RssHistory ORDER BY sid DESC")
+		if err != nil {
+			return "{}"
+		}
+	} else if source == "" {
+		rows, err = db.Query("SELECT * FROM RssHistory WHERE category=? ORDER BY sid DESC", category)
+		if err != nil {
+			return "{}"
+		}
+	} else {
+		rows, err = db.Query("SELECT * FROM RssHistory WHERE category=? AND source=? ORDER BY sid DESC", category, source)
+		if err != nil {
+			return "{}"
+		}
+	}
+
+	var readItem types.DatabaseRssItem
+	var resList []types.DatabaseRssItem
+
+	for rows.Next() {
+		rows.Scan(&readItem.ID, &readItem.Link, &readItem.Title, &readItem.Source, &readItem.Category, &readItem.PubDate, &readItem.ReadAt, &readItem.IsFavourite, &readItem.FavouritedAt)
+		resList = append(resList, readItem)
+	}
+
+	jsonContent, _ := json.Marshal(resList)
+	return string(jsonContent)
 }

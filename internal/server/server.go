@@ -88,6 +88,28 @@ func StartServer(logger *log.Logger, conf types.RootConfiguration) {
 		w.WriteHeader(http.StatusOK)
 	})
 
+	mux.HandleFunc("/rss/{category}/viewed", func(w http.ResponseWriter, r *http.Request) {
+		category := r.PathValue("category")
+		var returnJson string
+		if category == "all" {
+			returnJson = database.GetRssViewed("", "")
+		} else {
+			returnJson = database.GetRssViewed(category, "")
+		}
+
+		w.Header().Add("Content-Type", "application/json")
+		io.WriteString(w, returnJson)
+	})
+
+	mux.HandleFunc("/rss/{category}/{source}/viewed", func(w http.ResponseWriter, r *http.Request) {
+		category := r.PathValue("category")
+		source := r.PathValue("source")
+		returnJson := database.GetRssViewed(category, source)
+
+		w.Header().Add("Content-Type", "application/json")
+		io.WriteString(w, returnJson)
+	})
+
 	clientServer := &http.Server{
 		Addr:    ":" + strconv.Itoa(conf.Props.Port),
 		Handler: mux,
