@@ -115,37 +115,16 @@ func RefreshRssFeed(logger *log.Logger, list map[string][]types.ConfigTitleURLIt
 		return jsonFeed[i].PubDate.After(jsonFeed[j].PubDate)
 	})
 
-	jsonContent, err := json.Marshal(jsonFeed)
+	err := database.WriteRssItemsToCache(jsonFeed)
 	if err != nil {
-		logger.Println("Error in marshalling JSON feed")
-		logger.Println(err.Error())
-	}
-
-	strJsonFeed = string(jsonContent)
-
-	for source, feed := range sourceFeed {
-		sort.SliceStable(feed, func(i, j int) bool {
-			return feed[i].PubDate.After(feed[j].PubDate)
-		})
-		jSrcCont, _ := json.Marshal(feed)
-		strSrcFeed[source] = string(jSrcCont)
-	}
-
-	for category, feed := range catFeed {
-		sort.SliceStable(feed, func(i, j int) bool {
-			return feed[i].PubDate.After(feed[j].PubDate)
-		})
-		jCatCont, _ := json.Marshal(feed)
-		strCatFeed[category] = string(jCatCont)
-	}
-
-	srcJsonContent, err := json.Marshal(sources)
-	if err != nil {
-		logger.Println("Error in marshalling sources")
+		logger.Println("Error writing cache items to database")
 		logger.Println(err)
 	}
 
-	strSources = string(srcJsonContent)
+	err = marshalAndUpdateFeeds()
+	if err != nil {
+		logger.Println(err)
+	}
 }
 
 func LoadRssFromCache() error {
@@ -159,6 +138,12 @@ func LoadRssFromCache() error {
 		curId += 1
 		jsonFeed = append(jsonFeed, item)
 		sourceFeed[item.Source] = append(sourceFeed[item.Source], item)
+		catFeed[item.Category] = append(catFeed[item.Category], item)
+	}
+
+	err = marshalAndUpdateFeeds()
+	if err != nil {
+		return err
 	}
 	return nil
 }
@@ -342,6 +327,39 @@ func GetAndRemoveRssItems(category string, source string) ([]types.JsonFeedItem,
 
 		return returnFeed, nil
 	}
+}
+
+func marshalAndUpdateFeeds() error {
+	jsonContent, err := json.Marshal(jsonFeed)
+	if err != nil {
+		return err
+	}
+
+	strJsonFeed = string(jsonContent)
+
+	for source, feed := range sourceFeed {
+		sort.SliceStable(feed, func(i, j int) bool {
+			return feed[i].PubDate.After(feed[j].PubDate)
+		})
+		jSrcCont, _ := json.Marshal(feed)
+		strSrcFeed[source] = string(jSrcCont)
+	}
+
+	for category, feed := range catFeed {
+		sort.SliceStable(feed, func(i, j int) bool {
+			return feed[i].PubDate.After(feed[j].PubDate)
+		})
+		jCatCont, _ := json.Marshal(feed)
+		strCatFeed[category] = string(jCatCont)
+	}
+
+	srcJsonContent, err := json.Marshal(sources)
+	if err != nil {
+		return err
+	}
+
+	strSources = string(srcJsonContent)
+	return nil
 }
 
 func isAtomFeed(feed string) bool {

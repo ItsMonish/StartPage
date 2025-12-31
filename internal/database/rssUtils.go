@@ -9,14 +9,12 @@ import (
 )
 
 func GetRssCachedItems() ([]types.JsonFeedItem, error) {
-	db, err := GetDbInstance()
-	if err != nil {
-		return nil, err
-	}
+	db, _ := GetDbInstance()
 
-	test := db.QueryRow(`SELECT * FROM RssCache`)
-	err = test.Scan(nil)
-	if err == nil {
+	test := db.QueryRow(`SELECT count(*) FROM RssCache`)
+	var tmp string
+	err := test.Scan(&tmp)
+	if err != nil {
 		return nil, nil
 	}
 
@@ -24,13 +22,14 @@ func GetRssCachedItems() ([]types.JsonFeedItem, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
 
 	var cacheItems []types.JsonFeedItem
 	var item types.JsonFeedItem
+	var timeHolder string
 
 	for rows.Next() {
-		err = rows.Scan(&item.Link, &item.Title, &item.Source, &item.Category, &item.PubDate)
+		err = rows.Scan(&item.Link, &item.Title, &item.Source, &item.Category, &timeHolder)
+		item.PubDate, _ = time.Parse(time.RFC3339, timeHolder)
 		if err != nil {
 			return nil, err
 		}
@@ -107,6 +106,8 @@ func AddToRssHistory(rssItem types.JsonFeedItem) error {
 	if err != nil {
 		return err
 	}
+
+	_, _ = db.Exec(`DELETE FROM RssCache WHERE url=?`, rssItem.Link)
 
 	return nil
 }
@@ -209,4 +210,25 @@ func GetRssFavourites(category string, source string) (string, error) {
 
 	jsonCont, _ := json.Marshal(favItems)
 	return string(jsonCont), nil
+}
+
+func WriteRssItemsToCache(feedItems []types.JsonFeedItem) error {
+	db, _ := GetDbInstance()
+
+	_, _ = db.Exec(`DELETE FROM RssCache`)
+
+	for _, item := range feedItems {
+		_, err := db.Exec(`INSERT INTO RssCache VALUES(?,?,?,?,?)`,
+			item.Link,
+			item.Title,
+			item.Source,
+			item.Category,
+			item.PubDate,
+		)
+
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
