@@ -5,6 +5,7 @@ import (
 	"encoding/xml"
 	"fmt"
 	"log"
+	"slices"
 	"sort"
 	"time"
 
@@ -54,6 +55,10 @@ func RefreshYtFeed(logger *log.Logger, list []types.ConfigTitleURLItem) {
 
 		var jItem types.JsonYtItem
 		for _, item := range xmlFeed.Feed {
+			if database.IsInYtCache(item.Link.Value) ||
+				database.IsInYtHistory(item.Link.Value) {
+				continue
+			}
 			jItem.Title = item.Title
 			jItem.Link = item.Link.Value
 			jItem.Channel = channel.Title
@@ -116,6 +121,46 @@ func GetYtChannelFeed(channel string) (string, error) {
 		return "[]", fmt.Errorf("Channel %s not found", channel)
 	}
 	return con, nil
+}
+
+func GetYtItemWithId(id int) (types.JsonYtItem, error) {
+	for _, item := range totalFeed {
+		if item.ID == id {
+			return item, nil
+		}
+	}
+	return *new(types.JsonYtItem), nil
+}
+
+func RemoveYtItemWithId(id int) error {
+	idx := -1
+	channel := ""
+	for i, item := range totalFeed {
+		if item.ID == id {
+			idx = i
+			channel = item.Channel
+			break
+		}
+	}
+	if idx == -1 {
+		return fmt.Errorf("YT Item with id %d not found", id)
+	}
+	totalFeed = slices.Delete(totalFeed, idx, idx+1)
+	idx = -1
+	for i, item := range channelFeed[channel] {
+		if item.ID == id {
+			idx = i
+			break
+		}
+	}
+	if idx == -1 {
+		return fmt.Errorf("YT Item with id %d not found", id)
+	}
+	channelFeed[channel] = slices.Delete(channelFeed[channel], idx, idx+1)
+
+	_ = marshalAndUpdateYtFeeds()
+
+	return nil
 }
 
 func marshalAndUpdateYtFeeds() error {

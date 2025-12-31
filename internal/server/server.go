@@ -223,6 +223,19 @@ func StartServer(logger *log.Logger, conf types.RootConfiguration) {
 		w.Header().Add("Content-Type", "application/json")
 	})
 
+	mux.HandleFunc("/yt/{id}/seen", func(w http.ResponseWriter, r *http.Request) {
+		id, _ := strconv.Atoi(r.PathValue("id"))
+
+		err := markYtIdAsRead(id)
+		if err != nil {
+			logger.Println("Error in marking youtube feed item as read")
+			logger.Println(err)
+			w.WriteHeader(http.StatusBadRequest)
+		}
+
+		w.WriteHeader(http.StatusOK)
+	})
+
 	clientServer := &http.Server{
 		Addr:    ":" + strconv.Itoa(conf.Props.Port),
 		Handler: mux,
@@ -277,6 +290,24 @@ func markRssListAsRead(category string, source string) error {
 
 	for _, item := range targetList {
 		database.AddToRssHistory(item)
+	}
+	return nil
+}
+
+func markYtIdAsRead(id int) error {
+	ytItem, err := collector.GetYtItemWithId(id)
+	if err != nil {
+		return err
+	}
+
+	err = database.AddToYtHistory(ytItem)
+	if err != nil {
+		return err
+	}
+
+	err = collector.RemoveYtItemWithId(id)
+	if err != nil {
+		return err
 	}
 	return nil
 }
