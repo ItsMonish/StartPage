@@ -199,6 +199,30 @@ func StartServer(logger *log.Logger, conf types.RootConfiguration) {
 		io.WriteString(w, returnList)
 	})
 
+	mux.HandleFunc("/yt/srcs", func(w http.ResponseWriter, r *http.Request) {
+		channelList := collector.GetYtSources()
+
+		w.Header().Add("Content-Type", "application/json")
+		io.WriteString(w, channelList)
+	})
+
+	mux.HandleFunc("/yt/{channel}", func(w http.ResponseWriter, r *http.Request) {
+		channel := r.PathValue("channel")
+
+		if channel == "all" || channel == "" {
+			io.WriteString(w, collector.GetYtFullFeed())
+		} else {
+			content, err := collector.GetYtChannelFeed(channel)
+
+			if err != nil {
+				w.WriteHeader(http.StatusBadRequest)
+				return
+			}
+			io.WriteString(w, content)
+		}
+		w.Header().Add("Content-Type", "application/json")
+	})
+
 	clientServer := &http.Server{
 		Addr:    ":" + strconv.Itoa(conf.Props.Port),
 		Handler: mux,
@@ -217,7 +241,8 @@ func StartServer(logger *log.Logger, conf types.RootConfiguration) {
 
 	logger.Println("Starting server at port: ", conf.Props.Port)
 
-	go collector.InitRssCollector(logger, conf.Rss)
+	// go collector.InitRssCollector(logger, conf.Rss)
+	go collector.InitYtCollector(logger, conf.Yt)
 
 	if err := clientServer.ListenAndServe(); err != nil {
 		logger.Println("Error starting server at port", conf.Props.Port)

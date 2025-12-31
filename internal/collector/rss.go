@@ -121,7 +121,7 @@ func RefreshRssFeed(logger *log.Logger, list map[string][]types.ConfigTitleURLIt
 		logger.Println(err)
 	}
 
-	err = marshalAndUpdateFeeds()
+	err = marshalAndUpdateRssFeeds()
 	if err != nil {
 		logger.Println(err)
 	}
@@ -141,7 +141,7 @@ func LoadRssFromCache() error {
 		catFeed[item.Category] = append(catFeed[item.Category], item)
 	}
 
-	err = marshalAndUpdateFeeds()
+	err = marshalAndUpdateRssFeeds()
 	if err != nil {
 		return err
 	}
@@ -329,7 +329,7 @@ func GetAndRemoveRssItems(category string, source string) ([]types.JsonFeedItem,
 	}
 }
 
-func marshalAndUpdateFeeds() error {
+func marshalAndUpdateRssFeeds() error {
 	jsonContent, err := json.Marshal(jsonFeed)
 	if err != nil {
 		return err

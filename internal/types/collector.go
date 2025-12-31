@@ -30,3 +30,26 @@ type JsonFeedItem struct {
 	Source   string    `json:"source"`
 	Category string    `json:"category"`
 }
+
+type XmlYtFeed struct {
+	Title string `xml:"title"`
+	Feed  []struct {
+		Title string `xml:"group>title"`
+		Link  struct {
+			Value string `xml:"href,attr"`
+		} `xml:"link"`
+		PubDate   string `xml:"published"`
+		Thumbnail struct {
+			Value string `xml:"url,attr"`
+		} `xml:"group>thumbnail"`
+	} `xml:"entry"`
+}
+
+type JsonYtItem struct {
+	ID        int       `json:"id"`
+	Title     string    `json:"title"`
+	Link      string    `json:"link"`
+	PubDate   time.Time `json:"pubDate"`
+	Channel   string    `json:"channel"`
+	Thumbnail string    `json:"thumbnail"`
+}
