@@ -139,6 +139,66 @@ func StartServer(logger *log.Logger, conf types.RootConfiguration) {
 		w.WriteHeader(http.StatusOK)
 	})
 
+	mux.HandleFunc("POST /rss/item/favourite", func(w http.ResponseWriter, r *http.Request) {
+		body, err := io.ReadAll(r.Body)
+		if err != nil {
+			logger.Println("Error parsing POST body")
+		}
+
+		link := string(body)
+		err = database.FavouriteRssItem(link)
+		if err != nil {
+			logger.Println(err)
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+
+		w.WriteHeader(http.StatusOK)
+	})
+
+	mux.HandleFunc("POST /rss/item/unfavourite", func(w http.ResponseWriter, r *http.Request) {
+		body, err := io.ReadAll(r.Body)
+		if err != nil {
+			logger.Println("Error parsing POST body")
+		}
+
+		link := string(body)
+		err = database.UnFavouriteRssItem(link)
+		if err != nil {
+			logger.Println(err)
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+
+		w.WriteHeader(http.StatusOK)
+	})
+
+	mux.HandleFunc("/rss/{category}/favourites", func(w http.ResponseWriter, r *http.Request) {
+		category := r.PathValue("category")
+		returnList, err := database.GetRssFavourites(category, "")
+		if err != nil {
+			logger.Println(err)
+			w.WriteHeader(http.StatusBadRequest)
+		}
+
+		w.Header().Add("Content-Type", "application/json")
+		io.WriteString(w, returnList)
+	})
+
+	mux.HandleFunc("/rss/{category}/{source}/favourites", func(w http.ResponseWriter, r *http.Request) {
+		category := r.PathValue("category")
+		source := r.PathValue("source")
+
+		returnList, err := database.GetRssFavourites(category, source)
+		if err != nil {
+			logger.Println(err)
+			w.WriteHeader(http.StatusBadRequest)
+		}
+
+		w.Header().Add("Content-Type", "application/json")
+		io.WriteString(w, returnList)
+	})
+
 	clientServer := &http.Server{
 		Addr:    ":" + strconv.Itoa(conf.Props.Port),
 		Handler: mux,

@@ -136,10 +136,77 @@ func GetRssViewed(category string, source string) string {
 	var resList []types.DatabaseRssItem
 
 	for rows.Next() {
-		rows.Scan(&readItem.ID, &readItem.Link, &readItem.Title, &readItem.Source, &readItem.Category, &readItem.PubDate, &readItem.ReadAt, &readItem.IsFavourite, &readItem.FavouritedAt)
+		rows.Scan(&readItem.ID,
+			&readItem.Link,
+			&readItem.Title,
+			&readItem.Source,
+			&readItem.Category,
+			&readItem.PubDate,
+			&readItem.ReadAt,
+			&readItem.IsFavourite,
+			&readItem.FavouritedAt,
+		)
 		resList = append(resList, readItem)
 	}
 
 	jsonContent, _ := json.Marshal(resList)
 	return string(jsonContent)
+}
+
+func FavouriteRssItem(link string) error {
+	timeNow := time.Now().String()
+	db, _ := GetDbInstance()
+
+	_, err := db.Exec(`UPDATE RssHistory SET isFavourite=?, favouritedAt=? WHERE url=?`, true, timeNow, link)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func UnFavouriteRssItem(link string) error {
+	db, _ := GetDbInstance()
+	_, err := db.Exec(`UPDATE RssHistory SET isFavourite=?, favouritedAt=? WHERE url=?`, false, "", link)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func GetRssFavourites(category string, source string) (string, error) {
+	db, _ := GetDbInstance()
+
+	var rows *sql.Rows
+	var err error
+	if category == "all" && source == "" {
+		rows, err = db.Query(`SELECT * FROM RssHistory WHERE isFavourite=1`)
+	} else if category != "" && source == "" {
+		rows, err = db.Query(`SELECT * FROM RssHistory WHERE isFavourite=1 AND category=?`, category)
+	} else {
+		rows, err = db.Query(`SELECT * FROM RssHistory WHERE isFavourite=1 AND source=?`, source)
+	}
+	if err != nil {
+		return "", err
+	}
+
+	var favItems []types.DatabaseRssItem
+	var item types.DatabaseRssItem
+	for rows.Next() {
+		rows.Scan(&item.ID,
+			&item.Link,
+			&item.Title,
+			&item.Source,
+			&item.Category,
+			&item.PubDate,
+			&item.ReadAt,
+			&item.IsFavourite,
+			&item.FavouritedAt,
+		)
+		favItems = append(favItems, item)
+	}
+
+	jsonCont, _ := json.Marshal(favItems)
+	return string(jsonCont), nil
 }

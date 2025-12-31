@@ -44,11 +44,11 @@ func InitRssCollector(logger *log.Logger, list map[string][]types.ConfigTitleURL
 func RefreshRssFeed(logger *log.Logger, list map[string][]types.ConfigTitleURLItem) {
 	for category, feedList := range list {
 		for _, item := range feedList {
-			logger.Println("Collecting RSS feed from ", item.Title)
+			logger.Println("Collecting RSS feed from", item.Title)
 
 			content, err := MakeRequest(item.Url)
 			if err != nil {
-				logger.Println("Error in collecting feed from ", item.Title)
+				logger.Println("Error in collecting feed from", item.Title)
 				logger.Println(err.Error())
 			}
 
