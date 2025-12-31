@@ -236,6 +236,14 @@ func StartServer(logger *log.Logger, conf types.RootConfiguration) {
 		w.WriteHeader(http.StatusOK)
 	})
 
+	mux.HandleFunc("/yt/{channel}/viewed", func(w http.ResponseWriter, r *http.Request) {
+		channel := r.PathValue("channel")
+
+		returnJson := database.GetYtSeenItems(channel)
+
+		io.WriteString(w, returnJson)
+	})
+
 	clientServer := &http.Server{
 		Addr:    ":" + strconv.Itoa(conf.Props.Port),
 		Handler: mux,

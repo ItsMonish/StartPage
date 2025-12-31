@@ -1,6 +1,8 @@
 package database
 
 import (
+	"database/sql"
+	"encoding/json"
 	"time"
 
 	"github.com/ItsMonish/StartPage/internal/types"
@@ -108,4 +110,41 @@ func AddToYtHistory(item types.JsonYtItem) error {
 	_, _ = db.Exec(`DELETE FROM YtCache WHERE url=?`, item.Link)
 
 	return nil
+}
+
+func GetYtSeenItems(channel string) string {
+	db, err := GetDbInstance()
+
+	var rows *sql.Rows
+	if channel == "all" {
+		rows, err = db.Query("SELECT * FROM YtHistory ORDER BY sid DESC")
+		if err != nil {
+			return "{}"
+		}
+	} else {
+		rows, err = db.Query("SELECT * FROM YtHistory WHERE channel=? ORDER BY sid DESC", channel)
+		if err != nil {
+			return "{}"
+		}
+	}
+
+	var readItem types.DatabaseYtItem
+	var resList []types.DatabaseYtItem
+
+	for rows.Next() {
+		rows.Scan(&readItem.ID,
+			&readItem.Link,
+			&readItem.Thumbnail,
+			&readItem.Title,
+			&readItem.Channel,
+			&readItem.PubDate,
+			&readItem.SeenAt,
+			&readItem.IsFavourite,
+			&readItem.FavouritedAt,
+		)
+		resList = append(resList, readItem)
+	}
+
+	jsonContent, _ := json.Marshal(resList)
+	return string(jsonContent)
 }

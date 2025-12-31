@@ -11,3 +11,15 @@ type DatabaseRssItem struct {
 	IsFavourite  bool   `json:"isFavourite"`
 	FavouritedAt string `json:"favouritedAt"`
 }
+
+type DatabaseYtItem struct {
+	ID           int    `json:"id"`
+	Title        string `json:"title"`
+	Link         string `json:"link"`
+	PubDate      string `json:"pubDate"`
+	Channel      string `json:"channel"`
+	Thumbnail    string `json:"thumbnail"`
+	SeenAt       string `json:"seenAt"`
+	IsFavourite  bool   `json:"isFavourite"`
+	FavouritedAt string `json:"favouritedAt"`
+}
