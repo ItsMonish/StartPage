@@ -110,6 +110,35 @@ func StartServer(logger *log.Logger, conf types.RootConfiguration) {
 		io.WriteString(w, returnJson)
 	})
 
+	mux.HandleFunc("/rss/{category}/readAll", func(w http.ResponseWriter, r *http.Request) {
+		category := r.PathValue("category")
+
+		var err error
+		if category == "all" {
+			err = markRssListAsRead("", "")
+		} else {
+			err = markRssListAsRead(category, "")
+		}
+		if err != nil {
+			logger.Println("Error marking category", category, "as read")
+			logger.Println(err)
+			w.WriteHeader(http.StatusBadRequest)
+		}
+		w.WriteHeader(http.StatusOK)
+	})
+
+	mux.HandleFunc("/rss/{category}/{source}/readAll", func(w http.ResponseWriter, r *http.Request) {
+		category := r.PathValue("category")
+		source := r.PathValue("source")
+		err := markRssListAsRead(category, source)
+		if err != nil {
+			logger.Println("Error marking source", source, "as read")
+			logger.Println(err)
+			w.WriteHeader(http.StatusBadRequest)
+		}
+		w.WriteHeader(http.StatusOK)
+	})
+
 	clientServer := &http.Server{
 		Addr:    ":" + strconv.Itoa(conf.Props.Port),
 		Handler: mux,
@@ -152,5 +181,17 @@ func markRssIdAsRead(id int) error {
 		return err
 	}
 
+	return nil
+}
+
+func markRssListAsRead(category string, source string) error {
+	targetList, err := collector.GetAndRemoveRssItems(category, source)
+	if err != nil {
+		return err
+	}
+
+	for _, item := range targetList {
+		database.AddToRssHistory(item)
+	}
 	return nil
 }

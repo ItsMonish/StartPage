@@ -252,6 +252,98 @@ func RemoveFeedItemWithId(id int) error {
 	return nil
 }
 
+func GetAndRemoveRssItems(category string, source string) ([]types.JsonFeedItem, error) {
+	var returnFeed []types.JsonFeedItem
+	if category == "" && source == "" {
+		returnFeed = make([]types.JsonFeedItem, len(jsonFeed))
+		copy(returnFeed, jsonFeed)
+
+		jsonFeed = slices.Delete(jsonFeed, 0, len(jsonFeed))
+		strJsonFeed = "[]"
+		for cat := range catFeed {
+			catFeed[cat] = slices.Delete(catFeed[cat], 0, len(catFeed[cat]))
+			strCatFeed[cat] = "[]"
+		}
+		for src := range sourceFeed {
+			sourceFeed[src] = slices.Delete(sourceFeed[src], 0, len(sourceFeed[src]))
+			strSrcFeed[src] = "[]"
+		}
+
+		return returnFeed, nil
+	} else if category != "" && source == "" {
+		if _, ok := catFeed[category]; !ok {
+			return nil, fmt.Errorf("Cannot find RSS category %s", category)
+		}
+		returnFeed = make([]types.JsonFeedItem, len(catFeed[category]))
+		copy(returnFeed, catFeed[category])
+
+		catFeed[category] = slices.Delete(catFeed[category], 0, len(catFeed[category]))
+		strCatFeed[category] = "[]"
+
+		for _, item := range returnFeed {
+			idx := -1
+			for i, jItem := range jsonFeed {
+				if item.ID == jItem.ID {
+					idx = i
+					break
+				}
+			}
+			if idx != -1 {
+				jsonFeed = slices.Delete(jsonFeed, idx, idx+1)
+			}
+		}
+		jsonCont, _ := json.Marshal(jsonFeed)
+		strJsonFeed = string(jsonCont)
+
+		for _, src := range sources[category] {
+			sourceFeed[src] = slices.Delete(sourceFeed[src], 0, len(sourceFeed[src]))
+			strSrcFeed[src] = "[]"
+		}
+
+		return returnFeed, nil
+	} else {
+		if _, ok := sourceFeed[source]; !ok {
+			return nil, fmt.Errorf("Cannot find RSS source %s", source)
+		}
+		returnFeed = make([]types.JsonFeedItem, len(sourceFeed[source]))
+		copy(returnFeed, sourceFeed[source])
+
+		sourceFeed[source] = slices.Delete(sourceFeed[source], 0, len((sourceFeed[source])))
+		strSrcFeed[source] = "[]"
+
+		for _, item := range returnFeed {
+			idx := -1
+			for i, jItem := range jsonFeed {
+				if item.ID == jItem.ID {
+					idx = i
+					break
+				}
+			}
+			cIdx := -1
+			for i, cItem := range catFeed[item.Category] {
+				if item.ID == cItem.ID {
+					cIdx = i
+					break
+				}
+			}
+			if idx != -1 {
+				jsonFeed = slices.Delete(jsonFeed, idx, idx+1)
+			}
+			if cIdx != -1 {
+				catFeed[category] = slices.Delete(catFeed[category], cIdx, cIdx+1)
+			}
+		}
+
+		jsonCont, _ := json.Marshal(jsonFeed)
+		strJsonFeed = string(jsonCont)
+
+		jsonCont, _ = json.Marshal(catFeed[category])
+		strCatFeed[category] = string(jsonCont)
+
+		return returnFeed, nil
+	}
+}
+
 func isAtomFeed(feed string) bool {
 	if strings.Contains(feed, "<feed") {
 		return true
