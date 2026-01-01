@@ -26,6 +26,8 @@ var (
 	strJsonFeed string = ""
 	strSrcFeed  map[string]string
 	strCatFeed  map[string]string
+
+	RssErrFlag bool = false
 )
 
 func InitRssCollector(logger *log.Logger, list map[string][]types.ConfigTitleURLItem) {
@@ -48,6 +50,7 @@ func RefreshRssFeed(logger *log.Logger, list map[string][]types.ConfigTitleURLIt
 
 			content, err := MakeRequest(item.Url)
 			if err != nil {
+				RssErrFlag = true
 				logger.Println("Error in collecting feed from", item.Title)
 				logger.Println(err.Error())
 			}

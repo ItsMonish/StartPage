@@ -10,6 +10,7 @@ import (
 	"os/signal"
 	"strconv"
 	"syscall"
+	"time"
 
 	embeds "github.com/ItsMonish/StartPage"
 	"github.com/ItsMonish/StartPage/internal/collector"
@@ -17,8 +18,13 @@ import (
 	"github.com/ItsMonish/StartPage/internal/types"
 )
 
+var (
+	isServerRoutineLive bool = true
+)
+
 func StartServer(logger *log.Logger, conf types.RootConfiguration) {
 	quitServerChan := make(chan os.Signal, 1)
+	stopRoutineChan := make(chan bool, 1)
 	signal.Notify(quitServerChan, syscall.SIGTERM, syscall.SIGABRT, syscall.SIGINT)
 
 	mux := http.NewServeMux()
@@ -295,6 +301,21 @@ func StartServer(logger *log.Logger, conf types.RootConfiguration) {
 		w.WriteHeader(http.StatusOK)
 	})
 
+	mux.HandleFunc("/refreshPage", func(w http.ResponseWriter, r *http.Request) {
+		logger.Println("Refreshing feeds upon manual request")
+
+		stopRoutineChan <- true
+		go func() {
+			for isServerRoutineLive {
+				time.Sleep(2 * time.Second)
+			}
+			go startAndMaintainCollectors(logger, stopRoutineChan, conf)
+			isServerRoutineLive = true
+		}()
+
+		w.WriteHeader(http.StatusOK)
+	})
+
 	clientServer := &http.Server{
 		Addr:    ":" + strconv.Itoa(conf.Props.Port),
 		Handler: mux,
@@ -302,6 +323,7 @@ func StartServer(logger *log.Logger, conf types.RootConfiguration) {
 
 	go func() {
 		<-quitServerChan
+		stopRoutineChan <- true
 
 		database.CloseDbInstance()
 
@@ -313,13 +335,51 @@ func StartServer(logger *log.Logger, conf types.RootConfiguration) {
 
 	logger.Println("Starting server at port: ", conf.Props.Port)
 
-	// go collector.InitRssCollector(logger, conf.Rss)
-	go collector.InitYtCollector(logger, conf.Yt)
+	go startAndMaintainCollectors(logger, stopRoutineChan, conf)
 
 	if err := clientServer.ListenAndServe(); err != nil {
 		logger.Println("Error starting server at port", conf.Props.Port)
 		os.Exit(1)
 	}
+}
+
+func startAndMaintainCollectors(logger *log.Logger, signalChan chan bool, conf types.RootConfiguration) {
+	nextRssRefresh := time.Now()
+	nextYtRefresh := time.Now()
+
+	for {
+		select {
+		case <-signalChan:
+			isServerRoutineLive = false
+			logger.Println("Stopping server routine")
+			return
+		default:
+			if time.Now().After(nextRssRefresh) {
+				nextRssRefresh = updateWithInterval(conf.Props.RefreshInterval)
+				collector.InitRssCollector(logger, conf.Rss)
+				if collector.RssErrFlag {
+					logger.Println("There was some error in collecting RSS feed. Retrying in", conf.Props.RefreshInterval, "minutes")
+					nextRssRefresh = updateWithInterval(conf.Props.RefreshInterval)
+				}
+				collector.RssErrFlag = false
+			}
+			if time.Now().After(nextYtRefresh) {
+				nextYtRefresh = updateWithInterval(conf.Props.RefreshInterval)
+				collector.InitYtCollector(logger, conf.Yt)
+				if collector.YtErrFlag {
+					logger.Println("There was some error in collecting YT feed. Retrying in", conf.Props.RefreshInterval, "minutes")
+					nextYtRefresh = updateWithInterval(conf.Props.RefreshInterval)
+				}
+				collector.YtErrFlag = false
+			}
+			time.Sleep(20 * time.Second)
+		}
+
+	}
+}
+
+func updateWithInterval(interval int) time.Time {
+	return time.Now().Add(time.Duration(interval) * time.Minute)
 }
 
 func markRssIdAsRead(id int) error {

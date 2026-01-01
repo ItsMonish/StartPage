@@ -20,6 +20,8 @@ var (
 
 	strTotalFeed string
 	strChFeed    map[string]string
+
+	YtErrFlag bool = false
 )
 
 func InitYtCollector(logger *log.Logger, list []types.ConfigTitleURLItem) {
@@ -43,6 +45,7 @@ func RefreshYtFeed(logger *log.Logger, list []types.ConfigTitleURLItem) {
 
 		content, err := MakeRequest(channel.Url)
 		if err != nil {
+			YtErrFlag = true
 			logger.Println("Error collecting feed from", channel.Title)
 		}
 
