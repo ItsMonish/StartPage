@@ -74,7 +74,13 @@ func RefreshYtFeed(logger *log.Logger, list []types.ConfigTitleURLItem) {
 		return totalFeed[i].PubDate.After(totalFeed[j].PubDate)
 	})
 
-	err := marshalAndUpdateYtFeeds()
+	err := database.WriteYtItemsToCache(totalFeed)
+	if err != nil {
+		logger.Println("Error in writing items to cache")
+		logger.Println(err.Error())
+	}
+
+	err = marshalAndUpdateYtFeeds()
 	if err != nil {
 		logger.Println(err)
 	}

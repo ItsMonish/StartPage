@@ -204,3 +204,24 @@ func GetFavouritedYtItems(channel string) (string, error) {
 	jsonCont, _ := json.Marshal(favItems)
 	return string(jsonCont), nil
 }
+
+func WriteYtItemsToCache(ytItems []types.JsonYtItem) error {
+	db, _ := GetDbInstance()
+
+	_, _ = db.Exec(`DELETE FROM YtCache`)
+
+	for _, item := range ytItems {
+		_, err := db.Exec(`INSERT INTO YtCache VALUES(?,?,?,?,?)`,
+			item.Link,
+			item.Thumbnail,
+			item.Title,
+			item.Channel,
+			item.PubDate,
+		)
+
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
