@@ -244,6 +244,47 @@ func StartServer(logger *log.Logger, conf types.RootConfiguration) {
 		io.WriteString(w, returnJson)
 	})
 
+	mux.HandleFunc("/yt/item/favourite", func(w http.ResponseWriter, r *http.Request) {
+		body, err := io.ReadAll(r.Body)
+		if err != nil {
+			logger.Println("Error parsing POST body")
+		}
+		url := string(body)
+		err = database.FavouriteYtItem(url)
+		if err != nil {
+			logger.Println("Error in marking", url, "as favourite")
+			w.WriteHeader(http.StatusBadRequest)
+		}
+		w.WriteHeader(http.StatusOK)
+	})
+
+	mux.HandleFunc("/yt/item/unfavourite", func(w http.ResponseWriter, r *http.Request) {
+		body, err := io.ReadAll(r.Body)
+		if err != nil {
+			logger.Println("Error parsing POST body")
+		}
+		url := string(body)
+		err = database.UnFavouriteYtItem(url)
+		if err != nil {
+			logger.Println("Error in marking", url, "as favourite")
+			w.WriteHeader(http.StatusBadRequest)
+		}
+		w.WriteHeader(http.StatusOK)
+	})
+
+	mux.HandleFunc("/yt/{channel}/favourites", func(w http.ResponseWriter, r *http.Request) {
+		channel := r.PathValue("channel")
+		retList, err := database.GetFavouritedYtItems(channel)
+		if err != nil {
+			logger.Println("Error collecting YT favourited items")
+			logger.Println(err.Error())
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+		w.WriteHeader(http.StatusOK)
+		io.WriteString(w, retList)
+	})
+
 	clientServer := &http.Server{
 		Addr:    ":" + strconv.Itoa(conf.Props.Port),
 		Handler: mux,

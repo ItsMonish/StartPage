@@ -289,7 +289,7 @@ function renderYtJson(ytJsonList) {
     videoActionDiv.classList.add("video-actions");
     let favButton = document.createElement("button");
     favButton.classList.add("favorite-btn");
-    if ("watchedAt" in item) {
+    if ("watchedAt" in item && item.favouritedAt == "") {
       let pubDate = document.createElement("p");
       pubDate.innerHTML = "<strong>Published At: </strong>" + prettyDate(item.pubDate);
       let watchedAt = document.createElement("p");

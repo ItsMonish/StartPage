@@ -128,23 +128,79 @@ func GetYtSeenItems(channel string) string {
 		}
 	}
 
-	var readItem types.DatabaseYtItem
+	var seenItem types.DatabaseYtItem
 	var resList []types.DatabaseYtItem
 
 	for rows.Next() {
-		rows.Scan(&readItem.ID,
-			&readItem.Link,
-			&readItem.Thumbnail,
-			&readItem.Title,
-			&readItem.Channel,
-			&readItem.PubDate,
-			&readItem.SeenAt,
-			&readItem.IsFavourite,
-			&readItem.FavouritedAt,
+		rows.Scan(&seenItem.ID,
+			&seenItem.Link,
+			&seenItem.Thumbnail,
+			&seenItem.Title,
+			&seenItem.Channel,
+			&seenItem.PubDate,
+			&seenItem.SeenAt,
+			&seenItem.IsFavourite,
+			&seenItem.FavouritedAt,
 		)
-		resList = append(resList, readItem)
+		resList = append(resList, seenItem)
 	}
 
 	jsonContent, _ := json.Marshal(resList)
 	return string(jsonContent)
+}
+
+func FavouriteYtItem(url string) error {
+	timeNow := time.Now().String()
+	db, _ := GetDbInstance()
+
+	_, err := db.Exec(`UPDATE YtHistory SET isFavourite=?, favouritedAt=? WHERE url=?`, true, timeNow, url)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func UnFavouriteYtItem(url string) error {
+	db, _ := GetDbInstance()
+	_, err := db.Exec(`UPDATE YtHistory SET isFavourite=?, favouritedAt=? WHERE url=?`, false, "", url)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func GetFavouritedYtItems(channel string) (string, error) {
+	db, _ := GetDbInstance()
+
+	var rows *sql.Rows
+	var err error
+	if channel == "all" {
+		rows, err = db.Query(`SELECT * FROM YtHistory WHERE isFavourite=1`)
+	} else {
+		rows, err = db.Query(`SELECT * FROM YtHistory WHERE isFavourite=1 AND channel=?`, channel)
+	}
+	if err != nil {
+		return "", err
+	}
+
+	var favItems []types.DatabaseYtItem
+	var item types.DatabaseYtItem
+	for rows.Next() {
+		rows.Scan(&item.ID,
+			&item.Link,
+			&item.Thumbnail,
+			&item.Title,
+			&item.Channel,
+			&item.PubDate,
+			&item.SeenAt,
+			&item.IsFavourite,
+			&item.FavouritedAt,
+		)
+		favItems = append(favItems, item)
+	}
+
+	jsonCont, _ := json.Marshal(favItems)
+	return string(jsonCont), nil
 }

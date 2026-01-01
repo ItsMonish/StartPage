@@ -19,7 +19,7 @@ type DatabaseYtItem struct {
 	PubDate      string `json:"pubDate"`
 	Channel      string `json:"channel"`
 	Thumbnail    string `json:"thumbnail"`
-	SeenAt       string `json:"seenAt"`
+	SeenAt       string `json:"watchedAt"`
 	IsFavourite  bool   `json:"isFavourite"`
 	FavouritedAt string `json:"favouritedAt"`
 }
