@@ -22,6 +22,7 @@ var (
 	strChFeed    map[string]string
 
 	YtErrFlag bool = false
+	curYtId   int  = 1
 )
 
 func RefreshYtFeed(logger *log.Logger, list []types.ConfigTitleURLItem) {
@@ -47,6 +48,8 @@ func RefreshYtFeed(logger *log.Logger, list []types.ConfigTitleURLItem) {
 				database.IsInYtHistory(item.Link.Value) {
 				continue
 			}
+			jItem.ID = curYtId
+			curYtId += 1
 			jItem.Title = item.Title
 			jItem.Link = item.Link.Value
 			jItem.Channel = channel.Title
@@ -87,8 +90,8 @@ func LoadYtFromCache() error {
 	}
 
 	for _, item := range cacheFeed {
-		item.ID = curId
-		curId += 1
+		item.ID = curYtId
+		curYtId += 1
 		totalFeed = append(totalFeed, item)
 		channelFeed[item.Channel] = append(channelFeed[item.Channel], item)
 	}

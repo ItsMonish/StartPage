@@ -4,7 +4,6 @@ import (
 	"io"
 	"log"
 	"net/http"
-	"time"
 
 	"github.com/ItsMonish/StartPage/internal/types"
 )
@@ -32,7 +31,6 @@ func StartCollectors(logger *log.Logger, conf types.RootConfiguration) {
 		logger.Println("Error in loading YT feed from cache")
 		logger.Println(err.Error())
 	}
-	time.Sleep(10 * time.Second)
 
 	LoadRssSources(conf.Rss)
 	RefreshRssFeed(logger, conf.Rss)
