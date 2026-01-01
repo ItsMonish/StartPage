@@ -84,7 +84,7 @@ func AddToYtHistory(item types.JsonYtItem) error {
 						WHERE 
 						sid=(SELECT MIN(sid) FROM YtHistory 
 							WHERE
-							source=?)`, item.Channel)
+							channel=? AND isFavourite=0)`, item.Channel)
 		count--
 	}
 

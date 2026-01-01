@@ -84,7 +84,7 @@ func AddToRssHistory(rssItem types.JsonFeedItem) error {
 						WHERE 
 						sid=(SELECT MIN(sid) FROM RssHistory 
 							WHERE
-							source=?)`, rssItem.Source)
+							source=? AND isFavourite=0)`, rssItem.Source)
 		count--
 	}
 
