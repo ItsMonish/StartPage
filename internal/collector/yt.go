@@ -163,6 +163,41 @@ func RemoveYtItemWithId(id int) error {
 	return nil
 }
 
+func GetAndRemoveYtItems(channel string) ([]types.JsonYtItem, error) {
+	var returnList []types.JsonYtItem
+
+	if channel == "all" {
+		returnList = make([]types.JsonYtItem, len(totalFeed))
+		copy(returnList, totalFeed)
+		totalFeed = slices.Delete(totalFeed, 0, len(totalFeed))
+		strTotalFeed = "[]"
+
+		for ch := range channelFeed {
+			channelFeed[ch] = slices.Delete(channelFeed[ch], 0, len(channelFeed[ch]))
+			strChFeed[ch] = "[]"
+		}
+	} else {
+		var tempFeed []types.JsonYtItem
+		if _, ok := channelFeed[channel]; !ok {
+			return nil, fmt.Errorf("YT feed not found with channel %s", channel)
+		}
+		for i := range totalFeed {
+			if totalFeed[i].Channel != channel {
+				tempFeed = append(tempFeed, totalFeed[i])
+			}
+		}
+		totalFeed = slices.Delete(totalFeed, 0, len(totalFeed))
+		totalFeed = make([]types.JsonYtItem, len(tempFeed))
+		copy(totalFeed, tempFeed)
+
+		returnList = make([]types.JsonYtItem, len(channelFeed[channel]))
+		copy(returnList, channelFeed[channel])
+		channelFeed[channel] = slices.Delete(channelFeed[channel], 0, len(channelFeed[channel]))
+		marshalAndUpdateYtFeeds()
+	}
+	return returnList, nil
+}
+
 func marshalAndUpdateYtFeeds() error {
 	jsonCont, err := json.Marshal(totalFeed)
 	if err != nil {
