@@ -2,8 +2,44 @@ package collector
 
 import (
 	"io"
+	"log"
 	"net/http"
+	"time"
+
+	"github.com/ItsMonish/StartPage/internal/types"
 )
+
+func StartCollectors(logger *log.Logger, conf types.RootConfiguration) {
+	sources = make(map[string][]string)
+	sourceFeed = make(map[string][]types.JsonFeedItem)
+	catFeed = make(map[string][]types.JsonFeedItem)
+	strSrcFeed = make(map[string]string)
+	strCatFeed = make(map[string]string)
+	jsonFeed = make([]types.JsonFeedItem, 0)
+
+	strTotalFeed = "[]"
+	strChFeed = make(map[string]string)
+	channelFeed = make(map[string][]types.JsonYtItem)
+	totalFeed = make([]types.JsonYtItem, 0)
+
+	err := LoadRssFromCache()
+	if err != nil {
+		logger.Println("Error in loading RSS feed from cache")
+		logger.Println(err.Error())
+	}
+	err = LoadYtFromCache()
+	if err != nil {
+		logger.Println("Error in loading YT feed from cache")
+		logger.Println(err.Error())
+	}
+	time.Sleep(10 * time.Second)
+
+	LoadRssSources(conf.Rss)
+	RefreshRssFeed(logger, conf.Rss)
+
+	LoadYtSources(conf.Yt)
+	RefreshYtFeed(logger, conf.Yt)
+}
 
 func MakeRequest(url string) (string, error) {
 	req, err := http.NewRequest("GET", url, nil)

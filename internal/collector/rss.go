@@ -30,19 +30,6 @@ var (
 	RssErrFlag bool = false
 )
 
-func InitRssCollector(logger *log.Logger, list map[string][]types.ConfigTitleURLItem) {
-	sources = make(map[string][]string)
-	sourceFeed = make(map[string][]types.JsonFeedItem)
-	catFeed = make(map[string][]types.JsonFeedItem)
-	strSrcFeed = make(map[string]string)
-	strCatFeed = make(map[string]string)
-	jsonFeed = make([]types.JsonFeedItem, 0)
-
-	LoadRssSources(list)
-	LoadRssFromCache()
-	RefreshRssFeed(logger, list)
-}
-
 func RefreshRssFeed(logger *log.Logger, list map[string][]types.ConfigTitleURLItem) {
 	for category, feedList := range list {
 		for _, item := range feedList {

@@ -223,7 +223,7 @@ func WriteRssItemsToCache(feedItems []types.JsonFeedItem) error {
 			item.Title,
 			item.Source,
 			item.Category,
-			item.PubDate,
+			item.PubDate.Format(time.RFC3339),
 		)
 
 		if err != nil {

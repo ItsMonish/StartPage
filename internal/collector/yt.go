@@ -24,21 +24,6 @@ var (
 	YtErrFlag bool = false
 )
 
-func InitYtCollector(logger *log.Logger, list []types.ConfigTitleURLItem) {
-	strTotalFeed = "[]"
-	strChFeed = make(map[string]string)
-	channelFeed = make(map[string][]types.JsonYtItem)
-	totalFeed = make([]types.JsonYtItem, 0)
-
-	err := LoadYtFromCache()
-	if err != nil {
-		logger.Println("Error in loading YT feed from cache")
-		logger.Println(err.Error())
-	}
-	LoadYtSources(list)
-	RefreshYtFeed(logger, list)
-}
-
 func RefreshYtFeed(logger *log.Logger, list []types.ConfigTitleURLItem) {
 	for _, channel := range list {
 		logger.Println("Collecting YT feed from", channel.Title)

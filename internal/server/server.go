@@ -344,8 +344,9 @@ func StartServer(logger *log.Logger, conf types.RootConfiguration) {
 }
 
 func startAndMaintainCollectors(logger *log.Logger, signalChan chan bool, conf types.RootConfiguration) {
-	nextRssRefresh := time.Now()
-	nextYtRefresh := time.Now()
+	nextRssRefresh := updateWithInterval(conf.Props.RefreshInterval)
+	nextYtRefresh := updateWithInterval(conf.Props.RefreshInterval)
+	collector.StartCollectors(logger, conf)
 
 	for {
 		select {
@@ -356,7 +357,7 @@ func startAndMaintainCollectors(logger *log.Logger, signalChan chan bool, conf t
 		default:
 			if time.Now().After(nextRssRefresh) {
 				nextRssRefresh = updateWithInterval(conf.Props.RefreshInterval)
-				collector.InitRssCollector(logger, conf.Rss)
+				collector.RefreshRssFeed(logger, conf.Rss)
 				if collector.RssErrFlag {
 					logger.Println("There was some error in collecting RSS feed. Retrying in", conf.Props.RefreshInterval, "minutes")
 					nextRssRefresh = updateWithInterval(conf.Props.RefreshInterval)
@@ -365,7 +366,7 @@ func startAndMaintainCollectors(logger *log.Logger, signalChan chan bool, conf t
 			}
 			if time.Now().After(nextYtRefresh) {
 				nextYtRefresh = updateWithInterval(conf.Props.RefreshInterval)
-				collector.InitYtCollector(logger, conf.Yt)
+				collector.RefreshYtFeed(logger, conf.Yt)
 				if collector.YtErrFlag {
 					logger.Println("There was some error in collecting YT feed. Retrying in", conf.Props.RefreshInterval, "minutes")
 					nextYtRefresh = updateWithInterval(conf.Props.RefreshInterval)

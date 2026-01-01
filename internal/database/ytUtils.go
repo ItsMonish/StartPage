@@ -216,7 +216,7 @@ func WriteYtItemsToCache(ytItems []types.JsonYtItem) error {
 			item.Thumbnail,
 			item.Title,
 			item.Channel,
-			item.PubDate,
+			item.PubDate.Format(time.RFC3339),
 		)
 
 		if err != nil {
