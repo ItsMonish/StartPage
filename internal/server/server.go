@@ -359,8 +359,8 @@ func startAndMaintainCollectors(logger *log.Logger, signalChan chan bool, conf t
 				nextRssRefresh = updateWithInterval(conf.Props.RefreshInterval)
 				collector.RefreshRssFeed(logger, conf.Rss)
 				if collector.RssErrFlag {
-					logger.Println("There was some error in collecting RSS feed. Retrying in", conf.Props.RefreshInterval, "minutes")
-					nextRssRefresh = updateWithInterval(conf.Props.RefreshInterval)
+					logger.Println("There was some error in collecting RSS feed. Retrying in", conf.Props.RetryInterval, "minutes")
+					nextRssRefresh = updateWithInterval(conf.Props.RetryInterval)
 				}
 				collector.RssErrFlag = false
 			}
@@ -368,8 +368,8 @@ func startAndMaintainCollectors(logger *log.Logger, signalChan chan bool, conf t
 				nextYtRefresh = updateWithInterval(conf.Props.RefreshInterval)
 				collector.RefreshYtFeed(logger, conf.Yt)
 				if collector.YtErrFlag {
-					logger.Println("There was some error in collecting YT feed. Retrying in", conf.Props.RefreshInterval, "minutes")
-					nextYtRefresh = updateWithInterval(conf.Props.RefreshInterval)
+					logger.Println("There was some error in collecting YT feed. Retrying in", conf.Props.RetryInterval, "minutes")
+					nextYtRefresh = updateWithInterval(conf.Props.RetryInterval)
 				}
 				collector.YtErrFlag = false
 			}
