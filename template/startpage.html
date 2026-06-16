@@ -12,123 +12,133 @@
 
 <body>
 
-    <div class="icon-bar">
-        <div class="card search-card" onclick="changePage('search')">
-            <div class="search-icon">
-                <img width="24" height="24" src="/assets/search-ico.png" />
+    <div class="app-shell">
+
+        <div class="icon-bar">
+            <div class="card search-card" onclick="changePage('search')">
+                <div class="search-icon">
+                    <img width="24" height="24" src="/assets/search-ico.png" />
+                </div>
+            </div>
+            <div class="card rss-card" onclick="changePage('rss')">
+                <div class="rss-icon">
+                    <img width="24" height="24" src="/assets/rss-ico.png" />
+                    <span id="rss-bubble" class="notification-bubble"></span>
+                </div>
+            </div>
+            <div class="card yt-card" onclick="changePage('youtube')">
+                <div class="youtube-icon">
+                    <img width="24" height="24" src="/assets/youtube-ico.png" />
+                    <span id="youtube-bubble" class="notification-bubble"></span>
+                </div>
+            </div>
+            <div class="card ref-card" onclick="initRefresh();" title="Refresh feeds and config">
+                <div class="refresh-icon">
+                    <img width="24" height="24" src="/assets/refresh-ico.png" />
+                </div>
             </div>
         </div>
-        <div class="card rss-card" onclick="changePage('rss')">
-            <div class="rss-icon">
-                <img width="24" height="24" src="/assets/rss-ico.png" />
-                <span id="rss-bubble" class="notification-bubble"></span>
+
+        <div class="content">
+
+            <div id="search-page" class="page active-page">
+                <input class="search-bar" id="search-query" type="text" placeholder="Search..." autofocus />
+
+                <div class="favorites">
+                    <div class="column">
+                        {{ if ne .List1Name ""}}
+                        <h2>{{ .List1Name }}</h2>
+                        {{ else }}
+                        <h2>List 1</h2>
+                        {{ end }}
+                        <ul>
+                            {{ range .List1 }}
+                            <li><a href="{{ .Url }}">{{ .Title }}</a></li>
+                            {{ end }}
+                        </ul>
+                    </div>
+                    <div class="column">
+                        {{ if ne .List2Name ""}}
+                        <h2>{{ .List2Name }}</h2>
+                        {{ else }}
+                        <h2>List 2</h2>
+                        {{ end }}
+                        <ul>
+                            {{ range .List2 }}
+                            <li><a href="{{ .Url }}">{{ .Title }}</a></li>
+                            {{ end }}
+                        </ul>
+                    </div>
+                    <div class="column">
+                        {{ if ne .List3Name ""}}
+                        <h2>{{ .List3Name }}</h2>
+                        {{ else }}
+                        <h2>List 3</h2>
+                        {{ end }}
+                        <ul>
+                            {{ range .List3 }}
+                            <li><a href="{{ .Url }}">{{ .Title }}</a></li>
+                            {{ end }}
+                        </ul>
+                    </div>
+                    <div class="column">
+                        {{ if ne .List4Name ""}}
+                        <h2>{{ .List4Name }}</h2>
+                        {{ else }}
+                        <h2>List 4</h2>
+                        {{ end }}
+                        <ul>
+                            {{ range .List4 }}
+                            <li><a href="{{ .Url }}">{{ .Title }}</a></li>
+                            {{ end }}
+                        </ul>
+                    </div>
+                </div>
             </div>
-        </div>
-        <div class="card yt-card" onclick="changePage('youtube')">
-            <div class="youtube-icon">
-                <img width="24" height="24" src="/assets/youtube-ico.png" />
-                <span id="youtube-bubble" class="notification-bubble"></span>
+
+            <div id="rss-page" class="page">
+                <h1>RSS Feed</h1>
+
+                <div class="filters">
+                    <select id="category-filter">
+                    </select>
+
+                    <select id="read-filter">
+                        <option value="unread">Unread</option>
+                        <option value="read">Read</option>
+                        <option value="favourites">Favourites</option>
+                    </select>
+
+                    <button id="list-read" title="Mark current filter as Read" class="list-read-btn">
+                        Mark list as Read
+                    </button>
+                </div>
+
+                <div id="feed-list">
+                </div>
             </div>
-        </div>
-        <div class="card ref-card" onclick="initRefresh();" title="Refresh feeds and config">
-            <div class="refresh-icon">
-                <img width="24" height="24" src="/assets/refresh-ico.png" />
+
+            <div id="youtube-page" class="page">
+                <h1>YouTube Feed</h1>
+                <div class="filters">
+                    <select id="channel-filter">
+                    </select>
+
+                    <select id="yt-seen-filter">
+                        <option value="new">New</option>
+                        <option value="watched">Watched</option>
+                        <option value="favourites">Favourites</option>
+                    </select>
+                    <button id="list-read-yt" title="Mark current filter as Read" class="list-read-btn">
+                        Mark list as Seen
+                    </button>
+                </div>
+                <div class="video-list" id="video-list">
+                </div>
             </div>
+
         </div>
-    </div>
 
-    <div id="search-page" class="page active-page">
-        <input class="search-bar" id="search-query" type="text" placeholder="Search..." autofocus />
-
-        <div class="favorites">
-            <div class="column">
-                {{ if ne .List1Name ""}}
-                <h2>{{ .List1Name }}</h2>
-                {{ else }}
-                <h2>List 1</h2>
-                {{ end }}
-                <ul>
-                    {{ range .List1 }}
-                    <li><a href="{{ .Url }}">{{ .Title }}</a></li>
-                    {{ end }}
-                </ul>
-            </div>
-            <div class="column">
-                {{ if ne .List2Name ""}}
-                <h2>{{ .List2Name }}</h2>
-                {{ else }}
-                <h2>List 2</h2>
-                {{ end }}
-                <ul>
-                    {{ range .List2 }}
-                    <li><a href="{{ .Url }}">{{ .Title }}</a></li>
-                    {{ end }}
-                </ul>
-            </div>
-            <div class="column">
-                {{ if ne .List3Name ""}}
-                <h2>{{ .List3Name }}</h2>
-                {{ else }}
-                <h2>List 3</h2>
-                {{ end }}
-                <ul>
-                    {{ range .List3 }}
-                    <li><a href="{{ .Url }}">{{ .Title }}</a></li>
-                    {{ end }}
-                </ul>
-            </div>
-            <div class="column">
-                {{ if ne .List4Name ""}}
-                <h2>{{ .List4Name }}</h2>
-                {{ else }}
-                <h2>List 4</h2>
-                {{ end }}
-                <ul>
-                    {{ range .List4 }}
-                    <li><a href="{{ .Url }}">{{ .Title }}</a></li>
-                    {{ end }}
-                </ul>
-            </div>
-        </div>
-    </div>
-
-    <div id="rss-page" class="page">
-        <h1>RSS Feed</h1>
-
-        <select id="category-filter">
-        </select>
-
-        <select id="read-filter">
-            <option value="unread">Unread</option>
-            <option value="read">Read</option>
-            <option value="favourites">Favourites</option>
-        </select>
-
-        <button id="list-read" title="Mark current filter as Read" class="list-read-btn">
-            Mark list as Read
-        </button>
-
-        <div id="feed-list">
-        </div>
-    </div>
-
-    <div id="youtube-page" class="page">
-        <h1>YouTube Feed</h1>
-        <div class="filters">
-            <select id="channel-filter">
-            </select>
-
-            <select id="yt-seen-filter">
-                <option value="new">New</option>
-                <option value="watched">Watched</option>
-                <option value="favourites">Favourites</option>
-            </select>
-            <button id="list-read-yt" title="Mark current filter as Read" class="list-read-btn">
-                Mark list as Seen
-            </button>
-        </div>
-        <div class="video-list" id="video-list">
-        </div>
     </div>
 
     <script src="/assets/script.js"></script>

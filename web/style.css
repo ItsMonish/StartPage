@@ -8,6 +8,7 @@ html,
 body {
   height: 100%;
   width: 100%;
+  min-height: 0;
   background-color: #060606;
   color: #fff;
   font-family: Arial, sans-serif;
@@ -15,91 +16,23 @@ body {
   transition: background-color 0.5s ease;
 }
 
-#search-page {
-  flex-direction: column;
-  background-color: #060606;
-  justify-content: center;
-  align-items: center;
-  height: 100%;
-  text-align: center;
-  padding-left: 4vw;
-  padding-top: 1vw;
-}
-
-#youtube-page {
-  background: linear-gradient(90deg, #5c0009, #7e000d);
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  height: 100%;
-  text-align: center;
-  padding-left: 4vw;
-  padding-top: 1vw;
-}
-
-.search-bar {
-  width: 60%;
-  max-width: 700px;
-  padding: 10px;
-  font-size: 18px;
-  background-color: #333;
-  border: 1px solid #444;
-  border-radius: 5px;
-  color: #fff;
-  outline: none;
-}
-
-.search-bar:focus {
-  border-color: #0066cc;
-}
-
-.favorites {
-  padding-top: 10vh;
+.app-shell {
   display: flex;
-  justify-content: space-around;
-  margin-bottom: 40px;
-  width: 80%;
-}
-
-.column {
-  width: 22%;
-}
-
-.column li {
-  padding-top: 2px;
-  padding-bottom: 2px;
-}
-
-.column h2 {
-  font-size: 1.5em;
-  color: #e0e0e0;
-  margin-bottom: 10px;
-}
-
-.column ul {
-  list-style: none;
-  padding: 0;
-}
-
-.column ul li {
-  margin: 5px 0;
-}
-
-.column ul li a {
-  text-decoration: none;
-  color: #03a9f4;
-  font-size: 1.1em;
-}
-
-.column ul li a:hover {
-  text-decoration: underline;
+  height: 100%;
+  width: 100%;
+  min-height: 0;
 }
 
 .icon-bar {
-  position: absolute;
+  flex: 0 0 auto;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: stretch;
+  width: 60px;
+  min-width: 60px;
+  padding: 0;
+  background-color: #060606;
+  overflow-y: auto;
 }
 
 .icon-bar div {
@@ -110,7 +43,8 @@ body {
   justify-content: center;
   align-items: center;
   position: relative;
-  transition: background-color 0.3s ease;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  flex: 0 0 auto;
 }
 
 .icon-bar div:hover {
@@ -145,20 +79,15 @@ body {
   align-items: center;
 }
 
-.page {
-  display: none;
-  opacity: 0;
-}
-
-.active-page {
-  display: flex;
-  opacity: 1;
-}
-
 .card {
-  left: 0vw;
-  right: 20vw;
-  height: 31vh;
+  flex: 1 1 0;
+  min-height: 60px;
+  height: 31%;
+  width: 100%;
+  border-radius: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .refresh-icon {
@@ -166,10 +95,11 @@ body {
 }
 
 .ref-card {
-  left: 0vw;
-  right: 20vw;
-  height: 7vh;
+  flex: 0 0 auto;
+  width: 100%;
+  height: 44px;
   background-color: #000000;
+  margin-top: auto;
 }
 
 .search-card {
@@ -184,21 +114,131 @@ body {
   background-color: #5c0009;
 }
 
-#rss-page {
-  display: none;
-  justify-content: left;
-  text-align: left;
-  opacity: 0;
-  background: linear-gradient(90deg, #2a2a2a, #383838);
-  border-radius: 10px;
-  width: 100vw;
-  padding-left: 4vw;
-  padding-top: 1vw;
+/* ---------- Page container ----------
+   Each .page fills the remaining space next to the sidebar.
+   flex + min-height:0 lets inner scrollable lists size correctly
+   instead of relying on vh guesses that break when tiled. */
+
+.content {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+  overflow: hidden;
 }
 
-#rss-page.active-page {
-  display: block;
+.page {
+  display: none;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  width: 100%;
+  opacity: 0;
+  padding: 1.5vh 2vw;
+  overflow: hidden;
+}
+
+.active-page {
+  display: flex;
   opacity: 1;
+}
+
+#search-page {
+  justify-content: center;
+  align-items: center;
+  background-color: #060606;
+  text-align: center;
+}
+
+.search-bar {
+  width: 60%;
+  max-width: 700px;
+  min-width: 200px;
+  padding: 10px;
+  font-size: 18px;
+  background-color: #333;
+  border: 1px solid #444;
+  border-radius: 5px;
+  color: #fff;
+  outline: none;
+  flex: 0 0 auto;
+}
+
+.search-bar:focus {
+  border-color: #0066cc;
+}
+
+.favorites {
+  flex: 0 1 auto;
+  margin-top: 6vh;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-around;
+  gap: 20px;
+  width: 90%;
+  max-width: 1100px;
+  overflow-y: auto;
+  max-height: 60vh;
+}
+
+.column {
+  width: 22%;
+  min-width: 140px;
+  flex: 1 1 140px;
+}
+
+.column li {
+  padding-top: 2px;
+  padding-bottom: 2px;
+}
+
+.column h2 {
+  font-size: 1.5em;
+  color: #e0e0e0;
+  margin-bottom: 10px;
+}
+
+.column ul {
+  list-style: none;
+  padding: 0;
+}
+
+.column ul li {
+  margin: 5px 0;
+}
+
+.column ul li a {
+  text-decoration: none;
+  color: #03a9f4;
+  font-size: 1.1em;
+  word-break: break-word;
+}
+
+.column ul li a:hover {
+  text-decoration: underline;
+}
+
+/* ---------- RSS page ---------- */
+
+#rss-page {
+  background: linear-gradient(90deg, #2a2a2a, #383838);
+  border-radius: 10px;
+  align-items: flex-start;
+  text-align: left;
+}
+
+#rss-page h1 {
+  flex: 0 0 auto;
+}
+
+.filters {
+  flex: 0 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 10px;
+  align-items: center;
+  width: 100%;
 }
 
 select {
@@ -207,7 +247,8 @@ select {
   border: 1px solid #444;
   padding: 8px;
   border-radius: 5px;
-  margin: 10px;
+  margin: 4px;
+  max-width: 100%;
 }
 
 select:hover {
@@ -221,7 +262,8 @@ select:hover {
   border: 1px solid #444;
   padding: 8px;
   border-radius: 5px;
-  margin: 10px;
+  margin: 4px;
+  flex: 0 0 auto;
 }
 
 .list-read-btn:hover {
@@ -230,9 +272,11 @@ select:hover {
 }
 
 #feed-list {
-  overflow: hidden scroll;
-  height: 88vh;
-  padding-left: 20px;
+  flex: 1 1 auto;
+  min-height: 0;
+  width: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .feed-item {
@@ -256,11 +300,14 @@ select:hover {
   margin-bottom: 10px;
   color: #00bcd4;
   padding-left: 10px;
+  padding-right: 50px;
+  word-break: break-word;
 }
 
 .feed-item p {
   color: #bbb;
   padding-left: 5px;
+  word-break: break-word;
 }
 
 .feed-item p strong {
@@ -277,7 +324,7 @@ select:hover {
   font-size: 20px;
   cursor: pointer;
   position: absolute;
-  right: 60px;
+  right: 15px;
   bottom: 15px;
   transition: background-color 0.3s ease;
   display: flex;
@@ -285,41 +332,34 @@ select:hover {
   align-items: center;
   width: 40px;
   height: 40px;
+  flex: 0 0 auto;
 }
 
 .right-button:hover {
   background-color: #666;
 }
 
+/* ---------- YouTube page ---------- */
+
 #youtube-page {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: flex-start;
   background: linear-gradient(90deg, #5c0009, #7e000d);
-  color: #fff;
-  padding-top: 1vw;
-  padding-left: 4vw;
-  padding-right: 1vw;
-  height: 100%;
+  align-items: flex-start;
   text-align: left;
-  overflow: hidden;
 }
 
-.filters {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 20px;
-  align-items: center;
+#youtube-page h1 {
+  flex: 0 0 auto;
 }
 
 #video-list {
+  flex: 1 1 auto;
+  min-height: 0;
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  grid-auto-rows: min-content;
   gap: 20px;
-  margin-top: 20px;
+  margin-top: 10px;
   width: 100%;
-  height: 80vh;
   overflow-y: auto;
   padding-right: 10px;
 }
@@ -332,7 +372,8 @@ select:hover {
   flex-direction: column;
   position: relative;
   transition: transform 0.2s ease, background-color 0.2s ease;
-  height: 400px;
+  height: auto;
+  min-height: 320px;
   width: 100%;
   box-sizing: border-box;
   cursor: pointer;
@@ -348,22 +389,26 @@ select:hover {
   height: 200px;
   object-fit: cover;
   border-radius: 8px;
+  display: block;
 }
 
 .video-info {
   margin-top: 10px;
   text-align: left;
   flex-grow: 1;
+  padding-bottom: 40px;
 }
 
 .video-info h3 {
   font-size: 1.2em;
   margin-bottom: 5px;
+  word-break: break-word;
 }
 
 .video-info p {
   font-size: 1em;
   color: #bbb;
+  word-break: break-word;
 }
 
 .video-actions {
@@ -396,6 +441,8 @@ select:hover {
   background-color: #666;
 }
 
+/* ---------- Scrollbars ---------- */
+
 *::-webkit-scrollbar {
   height: 10px;
   width: 10px;
@@ -406,10 +453,7 @@ select:hover {
   background-color: #000000;
 }
 
-*::-webkit-scrollbar-track:hover {
-  background-color: #000000;
-}
-
+*::-webkit-scrollbar-track:hover,
 *::-webkit-scrollbar-track:active {
   background-color: #000000;
 }
@@ -419,10 +463,25 @@ select:hover {
   background-color: #404040;
 }
 
-*::-webkit-scrollbar-thumb:hover {
+*::-webkit-scrollbar-thumb:hover,
+*::-webkit-scrollbar-thumb:active {
   background-color: #505050;
 }
 
-*::-webkit-scrollbar-thumb:active {
-  background-color: #505050;
+/* ---------- Small/tiled-window guards ---------- */
+
+@media (max-width: 600px) {
+  .favorites {
+    width: 100%;
+  }
+  .column {
+    width: 100%;
+    flex: 1 1 100%;
+  }
+}
+
+@media (max-height: 500px) {
+  .favorites {
+    margin-top: 2vh;
+  }
 }
