@@ -7,6 +7,8 @@
     <title>Startpage</title>
     <!--Icons from flaticon https://www.flaticon.com/free-icons/cute-->
     <link rel="icon" type="image/png" href="assets/titlebar.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap">
     <link rel="stylesheet" href="/assets/style.css">
 </head>
 
@@ -14,35 +16,37 @@
 
     <div class="app-shell">
 
-        <div class="icon-bar">
-            <div class="card search-card" onclick="changePage('search')">
-                <div class="search-icon">
-                    <img width="24" height="24" src="/assets/search-ico.png" />
-                </div>
+        <nav class="icon-bar">
+            <div class="rail-top">
+                <button class="rail-item active" data-page="search" onclick="changePage('search')" title="Search">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                </button>
+                <button class="rail-item" data-page="rss" onclick="changePage('rss')" title="RSS feed">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11a9 9 0 0 1 9 9"/><path d="M4 4a16 16 0 0 1 16 16"/><circle cx="5" cy="19" r="1.5" fill="currentColor" stroke="none"/></svg>
+                    <span id="rss-bubble" class="count-pill"></span>
+                </button>
+                <button class="rail-item" data-page="youtube" onclick="changePage('youtube')" title="YouTube feed">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="4"/><path d="M10 9.5v5l4.5-2.5z" fill="currentColor" stroke="none"/></svg>
+                    <span id="youtube-bubble" class="count-pill"></span>
+                </button>
             </div>
-            <div class="card rss-card" onclick="changePage('rss')">
-                <div class="rss-icon">
-                    <img width="24" height="24" src="/assets/rss-ico.png" />
-                    <span id="rss-bubble" class="notification-bubble"></span>
-                </div>
+            <div class="rail-bottom">
+                <button class="rail-item refresh" onclick="initRefresh();" title="Refresh feeds and config">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><polyline points="21 3 21 9 15 9"/></svg>
+                </button>
             </div>
-            <div class="card yt-card" onclick="changePage('youtube')">
-                <div class="youtube-icon">
-                    <img width="24" height="24" src="/assets/youtube-ico.png" />
-                    <span id="youtube-bubble" class="notification-bubble"></span>
-                </div>
-            </div>
-            <div class="card ref-card" onclick="initRefresh();" title="Refresh feeds and config">
-                <div class="refresh-icon">
-                    <img width="24" height="24" src="/assets/refresh-ico.png" />
-                </div>
-            </div>
-        </div>
+        </nav>
 
         <div class="content">
 
             <div id="search-page" class="page active-page">
-                <input class="search-bar" id="search-query" type="text" placeholder="Search..." autofocus />
+                <div class="search-wrap">
+                    <span class="search-eyebrow">/// query</span>
+                    <div class="search-shell">
+                        <svg class="search-glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                        <input class="search-bar" id="search-query" type="text" placeholder="Search the web..." autofocus />
+                    </div>
+                </div>
 
                 <div class="favorites">
                     <div class="column">
@@ -97,44 +101,45 @@
             </div>
 
             <div id="rss-page" class="page">
-                <h1>RSS Feed</h1>
-
-                <div class="filters">
-                    <select id="category-filter">
-                    </select>
-
-                    <select id="read-filter">
-                        <option value="unread">Unread</option>
-                        <option value="read">Read</option>
-                        <option value="favourites">Favourites</option>
-                    </select>
-
-                    <button id="list-read" title="Mark current filter as Read" class="list-read-btn">
-                        Mark list as Read
-                    </button>
-                </div>
-
-                <div id="feed-list">
-                </div>
+                <header class="page-head">
+                    <div class="page-head-text">
+                        <span class="page-eyebrow">/// feed.rss</span>
+                        <h1>RSS</h1>
+                    </div>
+                    <div class="filters">
+                        <select id="category-filter"></select>
+                        <select id="read-filter">
+                            <option value="unread">Unread</option>
+                            <option value="read">Read</option>
+                            <option value="favourites">Favourites</option>
+                        </select>
+                        <button id="list-read" title="Mark current filter as Read" class="list-read-btn">
+                            Mark all read
+                        </button>
+                    </div>
+                </header>
+                <div id="feed-list"></div>
             </div>
 
             <div id="youtube-page" class="page">
-                <h1>YouTube Feed</h1>
-                <div class="filters">
-                    <select id="channel-filter">
-                    </select>
-
-                    <select id="yt-seen-filter">
-                        <option value="new">New</option>
-                        <option value="watched">Watched</option>
-                        <option value="favourites">Favourites</option>
-                    </select>
-                    <button id="list-read-yt" title="Mark current filter as Read" class="list-read-btn">
-                        Mark list as Seen
-                    </button>
-                </div>
-                <div class="video-list" id="video-list">
-                </div>
+                <header class="page-head">
+                    <div class="page-head-text">
+                        <span class="page-eyebrow">/// feed.youtube</span>
+                        <h1>YouTube</h1>
+                    </div>
+                    <div class="filters">
+                        <select id="channel-filter"></select>
+                        <select id="yt-seen-filter">
+                            <option value="new">New</option>
+                            <option value="watched">Watched</option>
+                            <option value="favourites">Favourites</option>
+                        </select>
+                        <button id="list-read-yt" title="Mark current filter as Seen" class="list-read-btn">
+                            Mark all seen
+                        </button>
+                    </div>
+                </header>
+                <div class="video-list" id="video-list"></div>
             </div>
 
         </div>

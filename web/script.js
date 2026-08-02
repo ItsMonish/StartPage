@@ -563,6 +563,11 @@ function changePage(page) {
 
   const selectedPage = document.getElementById(`${page}-page`);
   selectedPage.classList.add('active-page');
+
+  // sync rail active state
+  document.querySelectorAll('.rail-item[data-page]').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.page === page);
+  });
 }
 
 function newTab(caller, id, url, feed) {
