@@ -22,12 +22,10 @@ var (
 
 func main() {
 	userConfig, _ := os.UserConfigDir()
-	defaultConfig := userConfig + "/startpage/config.yml"
 	logFilePath := userConfig + "/startpage/application.log"
-	defaultDb := userConfig + "/startpage/database.db"
 
-	flag.StringVar(&configPath, "config", defaultConfig, "Path to the config file")
-	flag.StringVar(&dbPath, "db", defaultDb, "Path to the database file")
+	flag.StringVar(&configPath, "config", "", "Path to the config file (default \"$HOME/.config/startpage/config.yml\")")
+	flag.StringVar(&dbPath, "db", "", "Path to the database file (default \"$HOME/.config/startpage/database.db\")")
 	flag.IntVar(&port, "port", 8080, "Port to open the server on")
 	flag.BoolVar(&logging, "log", false, "Redirect log to STDOUT")
 	flag.Usage = func() {
@@ -36,6 +34,14 @@ func main() {
 	}
 
 	flag.Parse()
+
+	if configPath == "" {
+		configPath = userConfig + "/startpage/config.yml"
+	}
+
+	if dbPath != "" {
+		dbPath = userConfig + "/startpage/database.db"
+	}
 
 	if !logging {
 		logFile, _ := os.OpenFile(logFilePath, os.O_APPEND|os.O_CREATE|os.O_RDWR, 0644)
