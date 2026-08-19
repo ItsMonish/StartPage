@@ -68,6 +68,9 @@ func RefreshRssFeed(logger *log.Logger, list map[string][]types.ConfigTitleURLIt
 					catFeed[category] = append(catFeed[category], jsonItem)
 					sourceFeed[item.Title] = append(sourceFeed[item.Title], jsonItem)
 				}
+				if _, ok := sourceFeed[item.Title]; !ok {
+					sourceFeed[item.Title] = make([]types.JsonFeedItem, 0)
+				}
 			} else {
 				var xmlFeed types.XmlFeed
 				if err := xml.Unmarshal([]byte(content), &xmlFeed); err != nil {
@@ -97,7 +100,13 @@ func RefreshRssFeed(logger *log.Logger, list map[string][]types.ConfigTitleURLIt
 					jsonFeed = append(jsonFeed, jsonItem)
 					sourceFeed[item.Title] = append(sourceFeed[item.Title], jsonItem)
 				}
+				if _, ok := sourceFeed[item.Title]; !ok {
+					sourceFeed[item.Title] = make([]types.JsonFeedItem, 0)
+				}
 			}
+		}
+		if _, ok := catFeed[category]; !ok {
+			catFeed[category] = make([]types.JsonFeedItem, 0)
 		}
 	}
 
@@ -115,6 +124,8 @@ func RefreshRssFeed(logger *log.Logger, list map[string][]types.ConfigTitleURLIt
 	if err != nil {
 		logger.Println(err)
 	}
+	logger.Println(catFeed)
+	logger.Println(sourceFeed)
 }
 
 func LoadRssFromCache() error {
